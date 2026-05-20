@@ -5,21 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#E55302">
 <title>Inventario SINFRA · Codelco</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Inventario SINFRA">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<script>
-// Registrar Service Worker para que la app sea instalable y funcione offline
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('[PWA] Service Worker registrado:', reg.scope))
-      .catch(err => console.warn('[PWA] No se pudo registrar SW:', err));
-  });
-}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
