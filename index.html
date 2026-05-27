@@ -857,6 +857,221 @@ table.t tr.crit td:first-child{border-left:3px solid var(--red)}
 .ota-edit-ot-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#fff;border:1px solid var(--line);border-radius:5px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;margin-left:8px;font-family:inherit;vertical-align:middle}
 .ota-edit-ot-btn:hover{background:#FFF6E0;border-color:#E0A300;color:#9A6F00}
 
+/* ============================================================
+   CIERRE DE OT — Badge, botones y diálogo
+   ============================================================ */
+
+/* Badge "Cerrada" en la fila */
+.otm-closed-badge{
+  display:inline-block;
+  background:linear-gradient(135deg,#E1F5E8 0%,#C8EBD5 100%);
+  color:#1B7A3E;
+  padding:2px 8px;
+  border-radius:10px;
+  font-size:10.5px;
+  font-weight:700;
+  margin-left:6px;
+  letter-spacing:.2px;
+  font-family:'Inter',sans-serif;
+  border:1px solid #A0DBB3;
+}
+.otm-table tbody tr.is-closed{
+  background:#FAFCFB;
+  opacity:.78;
+}
+.otm-table tbody tr.is-closed:hover{
+  background:#F4F8F6;
+  opacity:1;
+}
+.otm-table tbody tr.is-closed .otm-num-cell{
+  color:var(--muted);
+  text-decoration:line-through;
+  text-decoration-color:#A0DBB3;
+}
+
+/* Botón "Marcar término" */
+.otm-row-actions .btn-close-ot{
+  background:#E1F5E8;
+  color:#1B7A3E;
+  border:1px solid #A0DBB3;
+}
+.otm-row-actions .btn-close-ot:hover{
+  background:#1B7A3E;
+  color:#fff;
+  border-color:#1B7A3E;
+}
+
+/* Botón "Reabrir" */
+.otm-row-actions .btn-reopen{
+  background:#FFF6E0;
+  color:#9A6F00;
+  border:1px solid #F2D98A;
+}
+.otm-row-actions .btn-reopen:hover{
+  background:#E0A300;
+  color:#fff;
+  border-color:#E0A300;
+}
+
+/* DIÁLOGO DE CIERRE DE OT */
+.close-ot-dialog-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20,30,40,.6);
+  z-index:300;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  opacity:0;
+  transition:opacity .2s;
+}
+.close-ot-dialog-overlay.open{opacity:1}
+.close-ot-dialog{
+  background:#fff;
+  border-radius:16px;
+  width:100%;
+  max-width:520px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.32);
+  transform:translateY(8px) scale(.98);
+  transition:transform .2s;
+}
+.close-ot-dialog-overlay.open .close-ot-dialog{transform:translateY(0) scale(1)}
+.close-ot-dialog-head{
+  padding:20px 24px 16px;
+  background:linear-gradient(135deg,#F0F8F4 0%,#E1F5E8 100%);
+  border-bottom:1px solid #A0DBB3;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.close-ot-dialog-icon{
+  width:48px;
+  height:48px;
+  font-size:26px;
+  border-radius:12px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 2px 8px rgba(27,122,62,.15);
+}
+.close-ot-dialog-head h3{
+  margin:0 0 4px;
+  font-family:'Montserrat',sans-serif;
+  font-size:17px;
+  font-weight:700;
+  color:#1B7A3E;
+}
+.close-ot-dialog-head p{
+  margin:0;
+  font-size:13px;
+  color:var(--ink-2);
+  line-height:1.4;
+}
+.close-ot-dialog-body{
+  padding:20px 24px;
+}
+.close-ot-dialog-q{
+  margin:0 0 8px;
+  font-size:15px;
+  font-weight:600;
+  color:var(--ink);
+  text-align:center;
+}
+.close-ot-dialog-sub{
+  margin:0 0 18px;
+  font-size:12.5px;
+  color:var(--muted);
+  text-align:center;
+  line-height:1.5;
+  white-space:pre-line;
+}
+.close-ot-dialog-actions{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.close-ot-btn{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  background:#fff;
+  border:1.5px solid var(--line);
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:left;
+  font-family:inherit;
+  width:100%;
+}
+.close-ot-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+.close-ot-btn-icon{
+  width:42px;
+  height:42px;
+  font-size:22px;
+  border-radius:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-weight:700;
+}
+.close-ot-btn-text{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+.close-ot-btn-text strong{
+  font-size:14px;
+  color:var(--ink);
+  margin-bottom:2px;
+}
+.close-ot-btn-text small{
+  font-size:12px;
+  color:var(--muted);
+}
+.close-ot-btn-yes{border-color:#5DADE2}
+.close-ot-btn-yes .close-ot-btn-icon{background:#D6EAF8;color:#1F5FB0}
+.close-ot-btn-yes:hover{background:#F4F9FD;border-color:#1F5FB0}
+.close-ot-btn-no{border-color:#A0DBB3}
+.close-ot-btn-no .close-ot-btn-icon{background:#E1F5E8;color:#1B7A3E}
+.close-ot-btn-no:hover{background:#F0F8F4;border-color:#1B7A3E}
+.close-ot-dialog-foot{
+  display:flex;
+  justify-content:flex-end;
+  padding:14px 24px;
+  background:#FAFBFC;
+  border-top:1px solid var(--line);
+}
+@media (max-width:560px){
+  .close-ot-dialog-head{padding:16px 18px 12px;gap:10px}
+  .close-ot-dialog-icon{width:40px;height:40px;font-size:22px}
+  .close-ot-dialog-body{padding:16px 18px}
+  .close-ot-dialog-foot{padding:12px 18px}
+}
+
+/* Indicador en el formulario de Entrada cuando se viene del cierre de OT */
+.entrada-closing-banner{
+  background:linear-gradient(135deg,#F0F8F4 0%,#E1F5E8 100%);
+  border-left:4px solid #1B7A3E;
+  padding:12px 16px;
+  border-radius:6px;
+  margin:0 0 16px;
+  font-size:13px;
+  color:#1B7A3E;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.entrada-closing-banner b{font-family:monospace;font-size:14px}
+
 /* DEVOLUCIÓN PENDIENTES */
 .pending-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
 .pending{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;transition:all .15s}
@@ -2237,13 +2452,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field field-full ent-devol-only" style="display:none">
           <label>OT / Actividad de origen <span class="req">*</span></label>
-          <div class="ot-input-row">
-            <input type="text" id="ent-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
-            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-              OTs
-            </button>
-          </div>
+          <input type="text" id="ent-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
           <span class="field-hint">OT desde la que vuelve el material (obligatorio para devoluciones). Si la OT no existe, se creará automáticamente.</span>
         </div>
 
@@ -2337,13 +2546,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field">
           <label>OT / N° Actividad <span class="req">*</span></label>
-          <div class="ot-input-row">
-            <input type="text" id="sal-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
-            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-              OTs
-            </button>
-          </div>
+          <input type="text" id="sal-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
           <span class="field-hint">💡 Empieza a escribir y aparecerán las OTs existentes. Si no existe, se creará automáticamente. Si destino = origen es <b>autoconsumo</b>.</span>
         </div>
 
@@ -2607,13 +2810,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field">
           <label>OT / N° Actividad <span class="req">*</span></label>
-          <div class="ot-input-row">
-            <input type="text" id="rsv-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
-            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-              OTs
-            </button>
-          </div>
+          <input type="text" id="rsv-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
           <span class="field-hint">Empieza a escribir y aparecerán las OTs existentes. Si no existe, se creará automáticamente.</span>
         </div>
 
@@ -2736,10 +2933,16 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
   <div class="card">
     <div class="card-h" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <span>Filtros y agrupación</span>
-      <button class="btn btn-secondary btn-sm" onclick="exportOtAnalysisExcel()" title="Descargar este análisis a Excel">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Descargar Excel
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="openOtModal()" title="Ver, editar, cerrar o fusionar OTs del catálogo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+          Catálogo de OTs
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="exportOtAnalysisExcel()" title="Descargar este análisis a Excel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Excel
+        </button>
+      </div>
     </div>
     <div class="filters">
       <input type="text" id="ota-search" class="grow" placeholder="Buscar por folio, OT, material, responsable o actividad...">
@@ -3218,11 +3421,12 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
             <input type="text" id="otm-search" placeholder="Buscar por número o título...">
           </div>
           <select id="otm-filter">
-            <option value="all">Todas las OTs</option>
+            <option value="all">Todas las activas</option>
             <option value="errors">⚠ Posibles errores (&lt; 9 caracteres)</option>
             <option value="untitled">Solo sin título</option>
             <option value="active">Con movimientos</option>
             <option value="empty">Sin movimientos</option>
+            <option value="closed">🏁 Solo cerradas</option>
           </select>
           <span class="otm-count-badge" id="otm-count">0 OTs</span>
         </div>
@@ -4208,6 +4412,26 @@ document.getElementById('form-entrada').addEventListener('submit', e=>{
   const label = isDevol ? '↩ Devolución registrada' : 'Entrada registrada';
   const extra = isDevol ? `\nMotivo: ${motivoDevol}${motivoOtro?` (${motivoOtro})`:''}` : '';
   toast(`${label}: folio ${folio} · ${entFolioItems.length} material${entFolioItems.length===1?'':'es'} · ${fmtQty(totalQty)} unid. → ${AREA_LABEL[area]}${extra}`, 'ok', isDevol ? 5500 : 4500);
+  // Si estamos en el flujo "cerrar OT después de devolución", ahora sí cerramos la OT
+  if(state._closingOtAfterDevol && isDevol){
+    const otIdToClose = state._closingOtAfterDevol;
+    const otNum = state._closingOtNumero;
+    // Verificar que la OT efectivamente coincida con la que se está procesando
+    const closedOk = closeOt(otIdToClose, true, `Cerrada tras devolución: folio ${folio}, ${fmtQty(totalQty)} unid. devueltas a ${AREA_LABEL[area]}`);
+    if(closedOk){
+      setTimeout(() => {
+        toast(`🏁 OT ${otNum} cerrada exitosamente. Devolución y término registrados.`, 'ok', 5500);
+      }, 1200);
+    }
+    // Limpiar flags
+    delete state._closingOtAfterDevol;
+    delete state._closingOtNumero;
+    // Restaurar texto del botón
+    updateEntradaSubmitButton();
+    // Quitar el banner si estaba
+    const banner = document.getElementById('entrada-closing-banner');
+    if(banner) banner.remove();
+  }
   resetEntrada();
 });
 
@@ -9490,7 +9714,8 @@ function ensureOtExists(numero, suggestedTitle){
 function poblarOtDatalist(){
   const dl = document.getElementById('ot-datalist');
   if(!dl) return;
-  const ots = (state.ots || []).slice();
+  // Excluir OTs cerradas del autocompletado: no deben usarse para nuevos movimientos
+  const ots = (state.ots || []).filter(o => o.status !== 'cerrada');
   const useScore = new Map();
   (state.movements || []).forEach(mv => {
     const n = normalizeOtInput(mv.ot);
@@ -9946,9 +10171,10 @@ function renderOtModalTable(){
   });
   // KPIs
   const total = ots.length;
-  const errors = ots.filter(o => o.numero.length < OT_MIN_LENGTH).length;
-  const untitled = ots.filter(o => !o.titulo).length;
-  const active = ots.filter(o => (movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0).length;
+  const errors = ots.filter(o => o.numero.length < OT_MIN_LENGTH && o.status !== 'cerrada').length;
+  const untitled = ots.filter(o => !o.titulo && o.status !== 'cerrada').length;
+  const active = ots.filter(o => o.status !== 'cerrada' && ((movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0)).length;
+  const closed = ots.filter(o => o.status === 'cerrada').length;
   const setKpi = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
   setKpi('otm-kpi-total', total.toLocaleString('es-CL'));
   setKpi('otm-kpi-errors', errors.toLocaleString('es-CL'));
@@ -9960,11 +10186,22 @@ function renderOtModalTable(){
   // Filtros
   const searchVal = (document.getElementById('otm-search')?.value || '').toLowerCase().trim();
   const filterVal = document.getElementById('otm-filter')?.value || 'all';
+  // Por defecto excluimos las OTs cerradas de "Todas" — se ven solo con el filtro específico
   let filtered = ots;
-  if(filterVal === 'errors') filtered = filtered.filter(o => o.numero.length < OT_MIN_LENGTH);
-  else if(filterVal === 'untitled') filtered = filtered.filter(o => !o.titulo);
-  else if(filterVal === 'active') filtered = filtered.filter(o => (movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0);
-  else if(filterVal === 'empty') filtered = filtered.filter(o => !(movCount.get(o.numero) > 0 || rsvCount.get(o.numero) > 0));
+  if(filterVal === 'closed'){
+    filtered = filtered.filter(o => o.status === 'cerrada');
+  } else if(filterVal === 'errors'){
+    filtered = filtered.filter(o => o.numero.length < OT_MIN_LENGTH && o.status !== 'cerrada');
+  } else if(filterVal === 'untitled'){
+    filtered = filtered.filter(o => !o.titulo && o.status !== 'cerrada');
+  } else if(filterVal === 'active'){
+    filtered = filtered.filter(o => o.status !== 'cerrada' && ((movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0));
+  } else if(filterVal === 'empty'){
+    filtered = filtered.filter(o => o.status !== 'cerrada' && !(movCount.get(o.numero) > 0 || rsvCount.get(o.numero) > 0));
+  } else {
+    // 'all' = todas las ACTIVAS (no cerradas). Para ver cerradas usar el filtro específico.
+    filtered = filtered.filter(o => o.status !== 'cerrada');
+  }
   if(searchVal){
     filtered = filtered.filter(o =>
       o.numero.toLowerCase().includes(searchVal) ||
@@ -10001,33 +10238,58 @@ function renderOtModalTable(){
     const mc = movCount.get(ot.numero) || 0;
     const rc = rsvCount.get(ot.numero) || 0;
     const isError = ot.numero.length < OT_MIN_LENGTH;
+    const isClosed = ot.status === 'cerrada';
     const tituloHtml = ot.titulo
       ? escHtml(ot.titulo)
       : `<span style="color:#9A6F00;font-style:italic">— sin título —</span>`;
     const autoTag = ot.isAutoCreated ? `<span class="otm-auto-tag">AUTO</span>` : '';
-    const errTag = isError ? `<span class="otm-err-tag" title="Número con menos de ${OT_MIN_LENGTH} caracteres — posible error">⚠ ERROR</span>` : '';
-    const canDelete = (mc + rc) === 0;
-    // Mostrar botón "Fusionar" si la OT tiene movimientos/reservas o es un error (cualquiera de los dos justifica fusionar)
-    const canMerge = (mc + rc) > 0 || isError;
-    const rowClass = (!ot.titulo ? 'is-untitled ' : '') + (isError ? 'is-error' : '');
+    const errTag = isError && !isClosed ? `<span class="otm-err-tag" title="Número con menos de ${OT_MIN_LENGTH} caracteres — posible error">⚠ ERROR</span>` : '';
+    const closedBadge = isClosed
+      ? `<span class="otm-closed-badge" title="OT cerrada el ${ot.closedAt ? fmtDate(ot.closedAt.slice(0,10)) : '—'}${ot.closedBy ? ` por ${escHtml(ot.closedBy)}` : ''}">🏁 Cerrada${ot.closedAt ? ` · ${fmtDate(ot.closedAt.slice(0,10))}` : ''}</span>`
+      : '';
+    const canDelete = (mc + rc) === 0 && !isClosed;
+    const canMerge = !isClosed && ((mc + rc) > 0 || isError);
+    const canClose = !isClosed && (mc + rc) > 0;  // Solo se cierran OTs activas con movimientos
+    const rowClass = (!ot.titulo && !isClosed ? 'is-untitled ' : '') + (isError && !isClosed ? 'is-error ' : '') + (isClosed ? 'is-closed' : '');
+    let actions = '';
+    if(isClosed){
+      // OT cerrada: solo permitir reabrir
+      actions = `<button class="btn btn-reopen" onclick="reopenOt(${ot.id})" title="Reabrir esta OT (volver a estar activa)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Reabrir
+      </button>`;
+    } else {
+      // OT activa: Editar / Fusionar / Marcar término / Eliminar
+      actions = `<button class="btn btn-edit" onclick="otmStartEdit(${ot.id})" title="Editar título o número">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar
+      </button>`;
+      if(canMerge){
+        actions += `<button class="btn btn-merge" onclick="openMergeModal(${ot.id})" title="Fusionar con otra OT existente (reasigna materiales)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+          Fusionar
+        </button>`;
+      }
+      if(canClose){
+        actions += `<button class="btn btn-close-ot" onclick="openCloseOtDialog(${ot.id})" title="Marcar OT como terminada (con opción de devolver material sobrante)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Marcar término
+        </button>`;
+      }
+      if(canDelete){
+        actions += `<button class="btn btn-del" onclick="deleteOt(${ot.id})" title="Eliminar">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>`;
+      }
+    }
     return `<tr class="${rowClass}">
-      <td><span class="otm-num-cell">${escHtml(ot.numero)}</span>${autoTag}${errTag}</td>
+      <td><span class="otm-num-cell">${escHtml(ot.numero)}</span>${autoTag}${errTag}${closedBadge}</td>
       <td>${tituloHtml}</td>
       <td class="num">${mc}</td>
       <td class="num">${rc}</td>
       <td>
         <div class="otm-row-actions">
-          <button class="btn btn-edit" onclick="otmStartEdit(${ot.id})" title="Editar título o número">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Editar
-          </button>
-          ${canMerge ? `<button class="btn btn-merge" onclick="openMergeModal(${ot.id})" title="Fusionar con otra OT existente (reasigna materiales)">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-            Fusionar
-          </button>` : ''}
-          ${canDelete ? `<button class="btn btn-del" onclick="deleteOt(${ot.id})" title="Eliminar">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
-          </button>` : ''}
+          ${actions}
         </div>
       </td>
     </tr>`;
@@ -10239,6 +10501,205 @@ async function deleteOt(id){
   try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_deleted', ot)); }catch(e){}
   toast(`OT ${ot.numero} eliminada.`, 'ok');
 }
+
+// ============================================================
+//                  CIERRE / TÉRMINO DE OT
+// ============================================================
+// Marca una OT como terminada (status='cerrada'). Los movimientos quedan intactos en el historial.
+// Las OTs cerradas no se sugieren en el autocompletado, pero siguen visibles en Análisis OT.
+
+function closeOt(id, withReturn, notes){
+  const ot = (state.ots || []).find(o => o.id === id);
+  if(!ot) return false;
+  ot.status = 'cerrada';
+  ot.closedAt = new Date().toISOString();
+  ot.closedBy = state.user || '—';
+  ot.closedWithReturn = !!withReturn;
+  if(notes) ot.closeNotes = notes;
+  saveState();
+  poblarOtDatalist();
+  renderOtModalTable();
+  try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_closed', ot)); }catch(e){}
+  return true;
+}
+
+async function reopenOt(id){
+  const ot = (state.ots || []).find(o => o.id === id);
+  if(!ot) return;
+  const ok = await confirmDialog(
+    `¿Reabrir OT ${ot.numero}?`,
+    `La OT volverá a estar activa y aparecerá nuevamente en el autocompletado al registrar movimientos.${ot.closedAt ? `\n\nFue cerrada el ${fmtDate(ot.closedAt.slice(0,10))}.` : ''}`,
+    'Sí, reabrir', false
+  );
+  if(!ok) return;
+  delete ot.status;
+  delete ot.closedAt;
+  delete ot.closedBy;
+  delete ot.closedWithReturn;
+  delete ot.closeNotes;
+  saveState();
+  poblarOtDatalist();
+  renderOtModalTable();
+  try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_reopened', ot)); }catch(e){}
+  toast(`OT ${ot.numero} reabierta.`, 'ok');
+}
+
+// Diálogo de cierre: pregunta si sobró material
+async function openCloseOtDialog(id){
+  const ot = (state.ots || []).find(o => o.id === id);
+  if(!ot) return;
+  // Confirmación primaria
+  const movCount = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === ot.numero).length;
+  const rsvActive = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === ot.numero && r.status === 'active').length;
+  let warnRsv = '';
+  if(rsvActive > 0){
+    warnRsv = `\n\n⚠ Esta OT tiene ${rsvActive} reserva${rsvActive===1?'':'s'} activa${rsvActive===1?'':'s'} sin cumplir. Considera cumplirlas o cancelarlas antes de cerrar.`;
+  }
+  // Diálogo personalizado: pregunta sobre material sobrante con 3 botones
+  const choice = await closeOtPromptDialog(ot, movCount, warnRsv);
+  if(choice === 'cancel') return;
+  if(choice === 'no_return'){
+    // No sobró material → cerrar directo
+    const ok = closeOt(ot.id, false, '');
+    if(ok){
+      toast(`✓ OT ${ot.numero} cerrada.`, 'ok', 4500);
+    }
+  } else if(choice === 'with_return'){
+    // Sí sobró material → redirigir a Devolución con flag
+    state._closingOtAfterDevol = ot.id;
+    state._closingOtNumero = ot.numero;
+    closeOtModal();
+    // Cambiar a la pestaña Entrada con subtype = devolución
+    switchView('entrada');
+    // Setear subtype devolución
+    setTimeout(() => {
+      const devolRadio = document.querySelector('input[name="ent-subtype"][value="devolucion"]');
+      if(devolRadio){
+        devolRadio.checked = true;
+        devolRadio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      // Pre-llenar la OT
+      const otEl = document.getElementById('ent-ot');
+      if(otEl){
+        otEl.value = ot.numero;
+        otEl.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      // Insertar banner explicativo arriba del formulario
+      const form = document.getElementById('form-entrada');
+      if(form && !document.getElementById('entrada-closing-banner')){
+        const banner = document.createElement('div');
+        banner.id = 'entrada-closing-banner';
+        banner.className = 'entrada-closing-banner';
+        banner.innerHTML = `
+          <span style="font-size:18px">🏁</span>
+          <div>
+            <div>Estás cerrando la <b>OT ${escHtml(ot.numero)}</b>${ot.titulo ? ` — ${escHtml(ot.titulo)}` : ''}.</div>
+            <div style="font-size:11.5px;color:#196B36;margin-top:2px">Registra la devolución del material sobrante. Al guardar, la OT quedará marcada como terminada.</div>
+          </div>
+          <button type="button" onclick="cancelOtCloseFlow()" style="margin-left:auto;background:#fff;border:1px solid #A0DBB3;color:#1B7A3E;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Cancelar cierre</button>
+        `;
+        form.parentNode.insertBefore(banner, form);
+      }
+      // Actualizar el botón de submit para que diga "Confirmar entrada y término de OT"
+      updateEntradaSubmitButton();
+      // Scroll al form
+      if(form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      toast(`📥 Registra la devolución del material sobrante de la OT ${ot.numero}. Al guardar se cerrará la OT.`, 'info', 6500);
+    }, 200);
+  }
+}
+
+// Cancela el flujo de cierre de OT (limpia los flags y restaura el botón)
+function cancelOtCloseFlow(){
+  delete state._closingOtAfterDevol;
+  delete state._closingOtNumero;
+  updateEntradaSubmitButton();
+  const banner = document.getElementById('entrada-closing-banner');
+  if(banner) banner.remove();
+  toast('Cierre de OT cancelado. La devolución se puede seguir registrando normalmente.', 'info', 4000);
+}
+window.cancelOtCloseFlow = cancelOtCloseFlow;
+
+// Diálogo modal personalizado para el cierre — devuelve 'cancel' | 'no_return' | 'with_return'
+function closeOtPromptDialog(ot, movCount, warnRsv){
+  return new Promise(resolve => {
+    // Construir HTML del diálogo
+    const overlay = document.createElement('div');
+    overlay.className = 'close-ot-dialog-overlay';
+    overlay.innerHTML = `
+      <div class="close-ot-dialog">
+        <div class="close-ot-dialog-head">
+          <div class="close-ot-dialog-icon">🏁</div>
+          <div>
+            <h3>Marcar término de OT ${escHtml(ot.numero)}</h3>
+            ${ot.titulo ? `<p>${escHtml(ot.titulo)}</p>` : '<p style="color:#9A6F00;font-style:italic">— sin título —</p>'}
+          </div>
+        </div>
+        <div class="close-ot-dialog-body">
+          <p class="close-ot-dialog-q">¿Sobró material que debe ser devuelto a bodega?</p>
+          <p class="close-ot-dialog-sub">Esta OT tiene ${movCount} movimiento${movCount===1?'':'s'} de salida registrado${movCount===1?'':'s'}.${warnRsv}</p>
+          <div class="close-ot-dialog-actions">
+            <button class="close-ot-btn close-ot-btn-yes" data-choice="with_return">
+              <div class="close-ot-btn-icon">📥</div>
+              <div class="close-ot-btn-text">
+                <strong>Sí, sobró material</strong>
+                <small>Te llevamos a Devolución para registrarlo</small>
+              </div>
+            </button>
+            <button class="close-ot-btn close-ot-btn-no" data-choice="no_return">
+              <div class="close-ot-btn-icon">✓</div>
+              <div class="close-ot-btn-text">
+                <strong>No, todo consumido</strong>
+                <small>La OT se cierra directamente</small>
+              </div>
+            </button>
+          </div>
+        </div>
+        <div class="close-ot-dialog-foot">
+          <button class="btn btn-ghost" data-choice="cancel">Cancelar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    const cleanup = (choice) => {
+      overlay.classList.remove('open');
+      setTimeout(() => overlay.remove(), 200);
+      resolve(choice);
+    };
+    overlay.querySelectorAll('[data-choice]').forEach(btn => {
+      btn.addEventListener('click', () => cleanup(btn.dataset.choice));
+    });
+    // ESC cancela
+    const escHandler = (e) => {
+      if(e.key === 'Escape'){
+        document.removeEventListener('keydown', escHandler);
+        cleanup('cancel');
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+  });
+}
+
+// Actualiza el texto del botón de submit en Entrada según si venimos del flujo de cierre de OT
+function updateEntradaSubmitButton(){
+  const btn = document.querySelector('#form-entrada button[type="submit"]');
+  if(!btn) return;
+  if(state._closingOtAfterDevol){
+    btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirmar entrada y término de OT ${state._closingOtNumero||''}`;
+    btn.style.background = 'linear-gradient(135deg,#1B8A8A 0%,#1B7A3E 100%)';
+  } else {
+    if(btn.dataset.originalText){
+      btn.innerHTML = btn.dataset.originalText;
+      btn.style.background = '';
+    }
+  }
+}
+window.closeOt = closeOt;
+window.reopenOt = reopenOt;
+window.openCloseOtDialog = openCloseOtDialog;
+window.updateEntradaSubmitButton = updateEntradaSubmitButton;
 
 // EXPORTAR catálogo de OTs a Excel
 function exportOtsExcel(){
