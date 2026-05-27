@@ -217,6 +217,646 @@ table.t tr.crit td:first-child{border-left:3px solid var(--red)}
   .modal .actions{bottom:-18px}
 }
 
+/* OT INPUT WITH MANAGE BUTTON */
+.ot-input-row{display:flex;gap:8px;align-items:stretch}
+.ot-input-row input{flex:1;min-width:0}
+.btn-ot-manage{display:inline-flex;align-items:center;gap:5px;padding:0 12px;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;height:auto}
+.btn-ot-manage:hover{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d)}
+.btn-ot-manage svg{flex-shrink:0}
+@media (max-width:640px){
+  .btn-ot-manage{padding:0 10px;font-size:12px}
+  .btn-ot-manage span{display:none}
+}
+
+/* =========================
+   OT MODAL — DISEÑO AMIGABLE
+   ========================= */
+#ot-modal{padding:24px;align-items:center;justify-content:center}
+#ot-modal.open{display:flex}
+
+/* Card principal del modal */
+.otm-card{
+  background:#fff;
+  border-radius:16px;
+  width:100%;
+  max-width:920px;
+  max-height:calc(100vh - 48px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.28),0 4px 12px rgba(0,0,0,.08);
+  /* Margen interior visible respecto al fondo */
+  margin:auto;
+}
+
+/* HEADER del modal */
+.otm-head{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:22px 26px 18px;
+  background:linear-gradient(135deg,#F8FAFC 0%,#EEF3F7 100%);
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+  position:relative;
+}
+.otm-head-icon{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  background:var(--teal);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,140,140,.25);
+}
+.otm-head-text{flex:1;min-width:0}
+.otm-head-text h3{
+  margin:0 0 4px;
+  font-family:'Montserrat',sans-serif;
+  font-size:19px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:-.2px;
+}
+.otm-head-text p{
+  margin:0;
+  font-size:13px;
+  color:var(--ink-2);
+  line-height:1.5;
+  max-width:640px;
+}
+.otm-close-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:0;
+  background:#fff;
+  color:var(--ink-2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s;
+  flex-shrink:0;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+.otm-close-btn:hover{background:#FEE;color:#C5302E;transform:scale(1.05)}
+
+/* BODY scrolleable */
+.otm-body{
+  flex:1;
+  overflow-y:auto;
+  padding:22px 26px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* KPIs */
+.otm-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.otm-kpi{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px 14px;
+  transition:all .15s;
+}
+.otm-kpi:hover{box-shadow:0 4px 12px rgba(0,0,0,.06);transform:translateY(-1px)}
+.otm-kpi-icon{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+  font-weight:700;
+}
+.otm-kpi-body{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.otm-kpi-v{
+  font-family:'Montserrat',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  color:var(--ink);
+}
+.otm-kpi-l{
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  font-weight:600;
+  margin-top:2px;
+}
+.otm-kpi-blue .otm-kpi-icon{background:#E7F1FB;color:#1F5FB0}
+.otm-kpi-blue{border-left:3px solid #1F5FB0}
+.otm-kpi-red .otm-kpi-icon{background:#FDE7E5;color:#C5302E}
+.otm-kpi-red{border-left:3px solid #C5302E}
+.otm-kpi-red.has-errors{background:linear-gradient(135deg,#FFF5F4 0%,#FDE7E5 100%);animation:otmPulseRed 2s ease-in-out infinite}
+@keyframes otmPulseRed{0%,100%{box-shadow:0 0 0 0 rgba(197,48,46,.15)}50%{box-shadow:0 0 0 6px rgba(197,48,46,0)}}
+.otm-kpi-yellow .otm-kpi-icon{background:#FFF6E0;color:#9A6F00}
+.otm-kpi-yellow{border-left:3px solid #E0A300}
+.otm-kpi-green .otm-kpi-icon{background:#E1F5E8;color:#1B7A3E}
+.otm-kpi-green{border-left:3px solid #1B7A3E}
+.otm-kpi-grey .otm-kpi-icon{background:#EDEFF2;color:#6B7280}
+.otm-kpi-grey{border-left:3px solid #6B7280}
+
+/* Row indicador de OT con error (longitud < 9) */
+.otm-table tbody tr.is-error{background:#FFF5F4}
+.otm-table tbody tr.is-error:hover{background:#FDE7E5}
+.otm-table tbody tr.is-error .otm-num-cell{color:#C5302E}
+.otm-err-tag{
+  display:inline-block;
+  background:#FDE7E5;
+  color:#C5302E;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:10px;
+  font-weight:700;
+  margin-left:6px;
+  letter-spacing:.3px;
+  font-family:'Inter',sans-serif;
+}
+
+/* Botón "Fusionar" en la fila */
+.otm-row-actions .btn-merge{
+  background:#FFF6E0;
+  color:#9A6F00;
+  border:1px solid #F2D98A;
+}
+.otm-row-actions .btn-merge:hover{background:#E0A300;color:#fff;border-color:#E0A300}
+
+/* SUB-MODAL: Picker para fusionar */
+.otm-merge-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20,30,40,.55);
+  z-index:200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.otm-merge-overlay.open{display:flex}
+.otm-merge-modal{
+  background:#fff;
+  border-radius:14px;
+  width:100%;
+  max-width:540px;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.32);
+}
+.otm-merge-head{
+  padding:18px 22px 14px;
+  background:linear-gradient(135deg,#FFFCF0 0%,#FFF6E0 100%);
+  border-bottom:1px solid #F2D98A;
+}
+.otm-merge-head h3{
+  margin:0 0 4px;
+  font-family:'Montserrat',sans-serif;
+  font-size:16px;
+  font-weight:700;
+  color:#9A6F00;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.otm-merge-head p{
+  margin:0;
+  font-size:12.5px;
+  color:#7A5500;
+  line-height:1.5;
+}
+.otm-merge-source-box{
+  background:#fff;
+  border:1.5px solid #F2D98A;
+  border-radius:8px;
+  padding:10px 12px;
+  margin-top:12px;
+  font-size:13px;
+}
+.otm-merge-source-box b{color:#9A6F00;font-family:monospace}
+.otm-merge-body{
+  padding:16px 22px;
+  flex:1;
+  overflow-y:auto;
+}
+.otm-merge-search-wrap{
+  position:relative;
+  margin-bottom:10px;
+}
+.otm-merge-search-wrap input{
+  width:100%;
+  padding:10px 12px 10px 36px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+}
+.otm-merge-search-wrap input:focus{
+  outline:none;
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,140,140,.12);
+}
+.otm-merge-search-wrap svg{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+}
+.otm-merge-list{
+  max-height:320px;
+  overflow-y:auto;
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.otm-merge-item{
+  padding:11px 14px;
+  border-bottom:1px solid #F2F4F6;
+  cursor:pointer;
+  transition:all .12s;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.otm-merge-item:last-child{border-bottom:0}
+.otm-merge-item:hover{background:#F0F8F8}
+.otm-merge-item.selected{background:#E1F5E8;border-left:3px solid #1B7A3E}
+.otm-merge-item-radio{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid var(--line);
+  flex-shrink:0;
+  position:relative;
+  transition:all .12s;
+}
+.otm-merge-item.selected .otm-merge-item-radio{
+  border-color:#1B7A3E;
+  background:#1B7A3E;
+}
+.otm-merge-item.selected .otm-merge-item-radio::after{
+  content:'';
+  position:absolute;
+  inset:3px;
+  border-radius:50%;
+  background:#fff;
+}
+.otm-merge-item-info{flex:1;min-width:0}
+.otm-merge-item-num{
+  font-family:monospace;
+  font-weight:700;
+  font-size:14px;
+  color:var(--ink);
+}
+.otm-merge-item-title{
+  font-size:12.5px;
+  color:var(--ink-2);
+  margin-top:2px;
+}
+.otm-merge-item-title.is-empty{color:#9A6F00;font-style:italic}
+.otm-merge-item-stats{
+  font-size:11px;
+  color:var(--muted);
+  text-align:right;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+.otm-merge-list-empty{
+  padding:30px 14px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+}
+.otm-merge-foot{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:14px 22px;
+  background:#F8FAFC;
+  border-top:1px solid var(--line);
+}
+.otm-merge-foot-info{
+  font-size:12px;
+  color:var(--ink-2);
+  flex:1;
+  min-width:0;
+}
+.otm-merge-foot-info b{color:#1B7A3E}
+
+@media (max-width:680px){
+  .otm-kpis{grid-template-columns:repeat(2,1fr)}
+  .otm-kpi-icon{width:32px;height:32px;font-size:16px}
+  .otm-kpi-v{font-size:18px}
+}
+
+/* Secciones (form + tabla) */
+.otm-section{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px 18px;
+}
+.otm-section-h{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+.otm-section-h-icon{
+  width:32px;
+  height:32px;
+  border-radius:7px;
+  background:#E7F1FB;
+  color:#1F5FB0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.otm-section-h-icon-list{background:#E1F5E8;color:#1B7A3E}
+.otm-section-h-text{flex:1;min-width:0}
+.otm-section-h-text h4{
+  margin:0 0 2px;
+  font-family:'Montserrat',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  color:var(--ink);
+}
+.otm-section-h-text p{
+  margin:0;
+  font-size:12.5px;
+  color:var(--muted);
+  line-height:1.4;
+}
+.otm-section-h-action{flex-shrink:0}
+.otm-section-h-action + .otm-section-h-action{margin-left:6px}
+
+/* Sección en modo edición (form-box) */
+.otm-section.is-editing{
+  background:linear-gradient(135deg,#FFFCF0 0%,#FFF6E0 100%);
+  border-color:#E0A300;
+  box-shadow:0 0 0 3px rgba(224,163,0,.08);
+}
+.otm-section.is-editing .otm-section-h-icon{background:#FFE9A8;color:#9A6F00}
+
+/* Form grid */
+.otm-form-grid{
+  display:grid;
+  grid-template-columns:170px 1fr;
+  gap:14px;
+}
+.otm-field{display:flex;flex-direction:column;gap:5px}
+.otm-field label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink-2);
+}
+.otm-field input{
+  padding:10px 12px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+  background:#fff;
+  transition:all .15s;
+}
+.otm-field input:focus{
+  outline:none;
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,140,140,.12);
+}
+@media (max-width:640px){
+  .otm-form-grid{grid-template-columns:1fr}
+}
+
+/* Contador de caracteres */
+.otm-len-counter{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:500;
+  background:#F4F5F7;
+  padding:2px 8px;
+  border-radius:10px;
+}
+.otm-len-counter.is-invalid{background:#FFE6E2;color:#C5302E}
+.otm-len-counter.is-valid{background:#E1F5E8;color:#1B7A3E}
+
+/* Advertencia de fusión */
+.otm-warn{
+  background:#FFF6E0;
+  border-left:3px solid #E0A300;
+  padding:11px 14px;
+  margin-top:10px;
+  font-size:13px;
+  color:#7A5500;
+  border-radius:6px;
+  line-height:1.5;
+}
+
+/* Botones acciones del form */
+.otm-form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+
+/* Filtros del catálogo */
+.otm-filters{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.otm-search-wrap{
+  position:relative;
+  flex:1;
+  min-width:180px;
+}
+.otm-search-icon{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+  pointer-events:none;
+}
+.otm-search-wrap input{
+  width:100%;
+  padding:9px 12px 9px 36px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  font-size:13.5px;
+  font-family:inherit;
+  background:#fff;
+  transition:all .15s;
+}
+.otm-search-wrap input:focus{
+  outline:none;
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,140,140,.12);
+}
+.otm-filters select{
+  padding:9px 12px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  font-size:13.5px;
+  font-family:inherit;
+  background:#fff;
+  cursor:pointer;
+  transition:all .15s;
+}
+.otm-filters select:focus{
+  outline:none;
+  border-color:var(--teal);
+}
+.otm-count-badge{
+  background:var(--teal);
+  color:#fff;
+  padding:5px 12px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+/* Tabla */
+.otm-table-wrap{
+  max-height:360px;
+  overflow-y:auto;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+}
+.otm-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.otm-table thead{
+  background:#F8FAFC;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+.otm-table thead th{
+  padding:10px 12px;
+  font-weight:700;
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:var(--ink-2);
+  border-bottom:2px solid var(--line);
+  text-align:left;
+}
+.otm-table thead th.num{text-align:right}
+.otm-table thead th:nth-child(1){width:140px}
+.otm-table thead th:nth-child(3),.otm-table thead th:nth-child(4){width:60px}
+.otm-table thead th:nth-child(5){width:155px}
+.otm-table tbody td{
+  padding:10px 12px;
+  border-bottom:1px solid #F2F4F6;
+  vertical-align:middle;
+}
+.otm-table tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+.otm-table tbody tr:hover{background:#FAFBFC}
+.otm-table tbody tr.is-untitled td:nth-child(2){color:#9A6F00;font-style:italic}
+.otm-num-cell{font-family:monospace;font-weight:700;font-size:13.5px;color:var(--ink)}
+.otm-auto-tag{
+  display:inline-block;
+  background:#FFF6E0;
+  color:#9A6F00;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:10px;
+  font-weight:700;
+  margin-left:6px;
+  letter-spacing:.3px;
+  font-family:'Inter',sans-serif;
+}
+.otm-row-actions{display:flex;gap:5px;flex-wrap:nowrap}
+.otm-row-actions .btn{padding:5px 9px;font-size:11.5px;border-radius:6px}
+.otm-row-actions .btn-edit{
+  background:#E7F1FB;
+  color:#1F5FB0;
+  border:1px solid #C7DDEE;
+}
+.otm-row-actions .btn-edit:hover{background:#1F5FB0;color:#fff;border-color:#1F5FB0}
+.otm-row-actions .btn-del{
+  background:#fff;
+  color:#C5302E;
+  border:1px solid #F2C5C3;
+}
+.otm-row-actions .btn-del:hover{background:#C5302E;color:#fff;border-color:#C5302E}
+.otm-row-actions .btn:disabled{opacity:.4;cursor:not-allowed;background:#F4F5F7;color:var(--muted);border-color:var(--line)}
+
+/* FOOTER del modal */
+.otm-foot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 26px;
+  background:#F8FAFC;
+  border-top:1px solid var(--line);
+  flex-shrink:0;
+}
+.otm-foot-hint{
+  font-size:12px;
+  color:var(--muted);
+}
+.otm-foot-hint kbd{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:1px 6px;
+  font-size:11px;
+  font-family:monospace;
+  box-shadow:0 1px 0 rgba(0,0,0,.06);
+}
+
+/* Responsive del modal */
+@media (max-width:780px){
+  #ot-modal{padding:12px}
+  .otm-head{padding:16px 18px 14px;gap:10px}
+  .otm-head-icon{width:38px;height:38px}
+  .otm-head-text h3{font-size:16px}
+  .otm-head-text p{font-size:12px}
+  .otm-body{padding:14px 16px;gap:14px}
+  .otm-section{padding:12px 14px}
+  .otm-foot{padding:12px 18px}
+  .otm-foot-hint{display:none}
+  .otm-table-wrap{max-height:280px}
+}
+
+/* Botón "Editar" en grupos del Análisis OT */
+.ota-edit-ot-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#fff;border:1px solid var(--line);border-radius:5px;font-size:11px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;margin-left:8px;font-family:inherit;vertical-align:middle}
+.ota-edit-ot-btn:hover{background:#FFF6E0;border-color:#E0A300;color:#9A6F00}
+
 /* DEVOLUCIÓN PENDIENTES */
 .pending-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
 .pending{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;transition:all .15s}
@@ -1421,6 +2061,9 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
 <main>
 
+<!-- Datalist compartido para autocompletado de OTs (se rellena con poblarOtDatalist()) -->
+<datalist id="ot-datalist"></datalist>
+
 <!-- ============== DASHBOARD ============== -->
 <section class="view active" id="view-dashboard">
   <h2 class="view-title">Resumen general</h2>
@@ -1594,8 +2237,14 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field field-full ent-devol-only" style="display:none">
           <label>OT / Actividad de origen <span class="req">*</span></label>
-          <input type="text" id="ent-ot" placeholder="Ej. OT-12345">
-          <span class="field-hint">OT desde la que vuelve el material (obligatorio para devoluciones).</span>
+          <div class="ot-input-row">
+            <input type="text" id="ent-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
+            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              OTs
+            </button>
+          </div>
+          <span class="field-hint">OT desde la que vuelve el material (obligatorio para devoluciones). Si la OT no existe, se creará automáticamente.</span>
         </div>
 
         <div class="field ent-devol-only" style="display:none">
@@ -1616,8 +2265,9 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
         </div>
 
         <div class="field field-full">
-          <label>Fecha</label>
+          <label>Fecha real <span style="color:var(--muted);font-weight:400;font-size:11px">(la del folio/cuando ocurrió)</span></label>
           <input type="date" id="ent-date">
+          <span class="field-hint">Por defecto es hoy. Si la actividad ocurrió en una fecha anterior, indícala aquí.</span>
         </div>
 
         <div class="field field-full">
@@ -1687,13 +2337,20 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field">
           <label>OT / N° Actividad <span class="req">*</span></label>
-          <input type="text" id="sal-ot" placeholder="Ej. OT-12345">
-          <span class="field-hint">💡 Si el destino es el mismo taller de origen (ej. KM 15 → KM 15) se registra como <b>autoconsumo</b>.</span>
+          <div class="ot-input-row">
+            <input type="text" id="sal-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
+            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              OTs
+            </button>
+          </div>
+          <span class="field-hint">💡 Empieza a escribir y aparecerán las OTs existentes. Si no existe, se creará automáticamente. Si destino = origen es <b>autoconsumo</b>.</span>
         </div>
 
         <div class="field">
-          <label>Fecha</label>
+          <label>Fecha real <span style="color:var(--muted);font-weight:400;font-size:11px">(la del folio/cuando ocurrió)</span></label>
           <input type="date" id="sal-date">
+          <span class="field-hint">Por defecto es hoy. Si la salida ocurrió en una fecha anterior, indícala aquí.</span>
         </div>
 
         <div class="field field-full">
@@ -1950,7 +2607,14 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
         <div class="field">
           <label>OT / N° Actividad <span class="req">*</span></label>
-          <input type="text" id="rsv-ot" placeholder="Ej. OT-12345">
+          <div class="ot-input-row">
+            <input type="text" id="rsv-ot" placeholder="Escribe el N° de OT (autocompleta)" list="ot-datalist" autocomplete="off">
+            <button type="button" class="btn-ot-manage" onclick="openOtModal()" title="Administrar catálogo de OTs">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              OTs
+            </button>
+          </div>
+          <span class="field-hint">Empieza a escribir y aparecerán las OTs existentes. Si no existe, se creará automáticamente.</span>
         </div>
 
         <div class="field">
@@ -2082,20 +2746,9 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
       <input type="text" id="ota-folio" placeholder="Filtrar por folio exacto..." title="Buscar líneas que pertenecen a un folio específico" style="min-width:170px">
       <select id="ota-destino" title="Filtrar por destino">
         <option value="">Todos los destinos</option>
-        <option value="KM15">KM 15</option>
-        <option value="Reactivos">Reactivos</option>
-        <option value="PMFC">PMFC</option>
-        <option value="Ch3">Ch 3°</option>
-        <option value="Ch4">Ch 4°</option>
-        <option value="Nodo3500">Nodo 3500</option>
-        <option value="Nodo3700">Nodo 3700</option>
       </select>
       <select id="ota-area" title="Filtrar por área de origen">
         <option value="">Todas las áreas origen</option>
-        <option value="KM15">KM 15</option>
-        <option value="Reactivos">Reactivos</option>
-        <option value="Nivel17">Nivel 17</option>
-        <option value="Ventiladores">Ventiladores</option>
       </select>
       <select id="ota-group" title="Agrupar resultados por">
         <option value="ot">Agrupar por OT</option>
@@ -2446,6 +3099,194 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
   </div>
 </div>
 
+<!-- ============== OTs MANAGEMENT MODAL ============== -->
+<div class="modal-bg" id="ot-modal" style="display:none">
+  <div class="otm-card">
+
+    <!-- Header con título grande y descripción -->
+    <div class="otm-head">
+      <div class="otm-head-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      </div>
+      <div class="otm-head-text">
+        <h3>Catálogo de Órdenes de Trabajo</h3>
+        <p>Las OTs se agregan automáticamente al registrar Entrada, Salida o Reserva. Al editar el número aquí, todos los movimientos y reservas se reasignan al nuevo.</p>
+      </div>
+      <button type="button" class="otm-close-btn" onclick="closeOtModal()" title="Cerrar (Esc)" aria-label="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Body scrolleable -->
+    <div class="otm-body">
+
+      <!-- KPIs compactos -->
+      <div class="otm-kpis">
+        <div class="otm-kpi otm-kpi-blue">
+          <div class="otm-kpi-icon">📋</div>
+          <div class="otm-kpi-body">
+            <span class="otm-kpi-v" id="otm-kpi-total">0</span>
+            <span class="otm-kpi-l">Total OTs</span>
+          </div>
+        </div>
+        <div class="otm-kpi otm-kpi-red" id="otm-kpi-errors-card" style="cursor:pointer" onclick="otmFilterByErrors()" title="Click para ver solo las OTs con posibles errores">
+          <div class="otm-kpi-icon">⚠</div>
+          <div class="otm-kpi-body">
+            <span class="otm-kpi-v" id="otm-kpi-errors">0</span>
+            <span class="otm-kpi-l">Posibles errores</span>
+          </div>
+        </div>
+        <div class="otm-kpi otm-kpi-yellow">
+          <div class="otm-kpi-icon">✎</div>
+          <div class="otm-kpi-body">
+            <span class="otm-kpi-v" id="otm-kpi-untitled">0</span>
+            <span class="otm-kpi-l">Sin título</span>
+          </div>
+        </div>
+        <div class="otm-kpi otm-kpi-green">
+          <div class="otm-kpi-icon">✓</div>
+          <div class="otm-kpi-body">
+            <span class="otm-kpi-v" id="otm-kpi-active">0</span>
+            <span class="otm-kpi-l">Con movimientos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección crear/editar (oculta por defecto: solo aparece al hacer click en Editar de una fila) -->
+      <div class="otm-section" id="otm-form-box" style="display:none">
+        <div class="otm-section-h">
+          <div class="otm-section-h-icon" id="otm-form-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="otm-section-h-text">
+            <h4 id="otm-form-h"><span>Editar OT</span></h4>
+            <p id="otm-form-sub">Cambia el título o el número. Si el nuevo número ya existe, se fusionarán las dos OTs.</p>
+          </div>
+        </div>
+        <form id="otm-form" autocomplete="off">
+          <input type="hidden" id="otm-edit-id" value="">
+          <div class="otm-form-grid">
+            <div class="otm-field">
+              <label>
+                <span>N° OT <span class="req">*</span></span>
+                <span class="otm-len-counter" id="otm-len-counter">mín. 9 caracteres</span>
+              </label>
+              <input type="text" id="otm-numero" placeholder="Ej. 123456789" minlength="9" inputmode="numeric">
+            </div>
+            <div class="otm-field">
+              <label><span>Título / Descripción</span></label>
+              <input type="text" id="otm-titulo" placeholder="Ej. Cambio de bomba SAG 5">
+            </div>
+          </div>
+          <div id="otm-merge-warning" class="otm-warn" style="display:none"></div>
+          <div class="otm-form-actions">
+            <button type="button" class="btn btn-ghost" id="otm-cancel-edit" style="display:none" onclick="otmCancelEdit()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Cancelar edición
+            </button>
+            <button type="submit" class="btn btn-primary" id="otm-submit-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="otm-submit-label">Agregar OT</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sección catálogo -->
+      <div class="otm-section">
+        <div class="otm-section-h">
+          <div class="otm-section-h-icon otm-section-h-icon-list">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <div class="otm-section-h-text">
+            <h4>Catálogo completo</h4>
+            <p>Busca, filtra y administra todas las OTs registradas.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm otm-section-h-action" onclick="syncOtsFromMovements(true); renderOtModalTable();" title="Buscar en movimientos y reservas si hay OTs que aún no estén en este catálogo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Sincronizar
+          </button>
+          <button class="btn btn-secondary btn-sm otm-section-h-action" onclick="exportOtsExcel()" title="Descargar lista a Excel">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel
+          </button>
+        </div>
+
+        <div class="otm-filters">
+          <div class="otm-search-wrap">
+            <svg class="otm-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="otm-search" placeholder="Buscar por número o título...">
+          </div>
+          <select id="otm-filter">
+            <option value="all">Todas las OTs</option>
+            <option value="errors">⚠ Posibles errores (&lt; 9 caracteres)</option>
+            <option value="untitled">Solo sin título</option>
+            <option value="active">Con movimientos</option>
+            <option value="empty">Sin movimientos</option>
+          </select>
+          <span class="otm-count-badge" id="otm-count">0 OTs</span>
+        </div>
+
+        <div class="otm-table-wrap">
+          <table class="otm-table" id="otm-tbl">
+            <thead><tr>
+              <th>N° OT</th>
+              <th>Título</th>
+              <th class="num">Mov.</th>
+              <th class="num">Rsv.</th>
+              <th>Acciones</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer fijo -->
+    <div class="otm-foot">
+      <span class="otm-foot-hint">💡 Presiona <kbd>Esc</kbd> o el botón para cerrar</span>
+      <button type="button" class="btn btn-primary" onclick="closeOtModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== SUB-MODAL: FUSIONAR OT (picker de OT destino) ============== -->
+<div class="otm-merge-overlay" id="otm-merge-overlay">
+  <div class="otm-merge-modal">
+    <div class="otm-merge-head">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M9 12l2 2 4-4"/></svg>
+        Fusionar OT con una existente
+      </h3>
+      <p>Selecciona la OT correcta. Todos los movimientos y reservas de la OT errónea se reasignarán a la OT que elijas.</p>
+      <div class="otm-merge-source-box" id="otm-merge-source-info">
+        <!-- Se llena dinámicamente con info de la OT origen -->
+      </div>
+    </div>
+    <div class="otm-merge-body">
+      <div class="otm-merge-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="otm-merge-search" placeholder="Buscar OT destino por número o título...">
+      </div>
+      <div class="otm-merge-list" id="otm-merge-list">
+        <!-- Se llena dinámicamente con las OTs candidatas -->
+      </div>
+    </div>
+    <div class="otm-merge-foot">
+      <span class="otm-merge-foot-info" id="otm-merge-foot-info">Selecciona una OT destino…</span>
+      <button type="button" class="btn btn-ghost" onclick="closeMergeModal()">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="otm-merge-confirm-btn" disabled onclick="otmConfirmMerge()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar fusión
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ============== EDIT PIN GATE MODAL ============== -->
 <div class="modal-bg" id="edit-pin-modal">
   <div class="modal" style="max-width:380px">
@@ -2689,6 +3530,8 @@ function defaultState(){
     nextMovId: _maxMovId + 1,
     reservations: [],
     nextReservationId: 1,
+    ots: [],
+    nextOtId: 1,
     createdAt: new Date().toISOString(),
     sync: {
       enabled: false,
@@ -2719,6 +3562,59 @@ function migrate(s){
   if(typeof s.nextReservationId !== 'number'){
     const maxId = s.reservations.reduce((m,r)=>Math.max(m, r.id||0), 0);
     s.nextReservationId = maxId + 1;
+  }
+  // OTs migration: extraer OTs únicas de movimientos + reservas existentes
+  if(!Array.isArray(s.ots)) s.ots = [];
+  if(typeof s.nextOtId !== 'number') s.nextOtId = 1;
+  // Helper: normalizar número de OT (quitar espacios, prefijos comunes)
+  const _normOt = (raw) => {
+    if(!raw) return '';
+    let v = String(raw).trim();
+    // Quitar prefijos comunes "OT-", "OT ", "ot-"
+    v = v.replace(/^(ot[\s\-_]*)/i, '');
+    // Quitar espacios internos
+    v = v.replace(/\s+/g, '');
+    return v;
+  };
+  // Si todavía no hay OTs registradas, auto-poblar desde movimientos + reservas
+  if(s.ots.length === 0){
+    const seen = new Map(); // numero normalizado -> {numero, titulo, fecha, ejemplos}
+    const collectOt = (rawOt, activity, timestamp) => {
+      const num = _normOt(rawOt);
+      if(!num) return;
+      if(!seen.has(num)){
+        seen.set(num, { numero: num, titulo: '', firstSeen: timestamp || '', activities: [] });
+      }
+      const entry = seen.get(num);
+      if(activity && activity.trim() && entry.activities.length < 3){
+        entry.activities.push(activity.trim());
+      }
+      // Conservar la fecha más antigua como creación
+      if(timestamp && (!entry.firstSeen || timestamp < entry.firstSeen)){
+        entry.firstSeen = timestamp;
+      }
+    };
+    (s.movements||[]).forEach(mv => collectOt(mv.ot, mv.activity, mv.timestamp));
+    (s.reservations||[]).forEach(r => collectOt(r.ot, r.activity, r.timestamp));
+    let id = 1;
+    seen.forEach(entry => {
+      // Tomar el título más frecuente entre los activities (o el primero)
+      let titulo = '';
+      if(entry.activities.length){
+        const freq = {};
+        entry.activities.forEach(a => { freq[a] = (freq[a]||0) + 1; });
+        titulo = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0];
+      }
+      s.ots.push({
+        id: id++,
+        numero: entry.numero,
+        titulo: titulo,
+        createdAt: entry.firstSeen || new Date().toISOString(),
+        createdBy: 'migración automática',
+        isAutoCreated: true,
+      });
+    });
+    s.nextOtId = id;
   }
   return s;
 }
@@ -2839,12 +3735,12 @@ document.querySelectorAll('.tab').forEach(t=>{
 function switchView(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='view-'+v));
-  // Si la pestaña quedó abierta de un día anterior, la fecha guardada en el input quedó vieja.
-  // Refresca SOLO si el valor actual es anterior a hoy (no toca fechas que el usuario eligió a futuro).
+  // Si la pestaña está vacía, ponemos hoy como fecha por defecto.
+  // Si el usuario ya eligió una fecha (incluso anterior a hoy) la respetamos.
   const today = todayStr();
   ['ent-date','sal-date','rsv-date'].forEach(id => {
     const el = document.getElementById(id);
-    if(el && (!el.value || el.value < today)) el.value = today;
+    if(el && !el.value) el.value = today;
   });
   if(v==='dashboard') renderDashboard();
   if(v==='inventario') renderInventario();
@@ -3257,14 +4153,13 @@ document.getElementById('form-entrada').addEventListener('submit', e=>{
   const isDevol = (subtype === 'devolucion');
   const folio = document.getElementById('ent-folio').value.trim();
   const area = document.querySelector('#ent-areas input:checked')?.value;
-    let date = document.getElementById('ent-date').value || todayStr();
-  // Protección fuerte: la fecha del movimiento SIEMPRE es la del momento del registro.
-  // El input del form es solo informativo. Esto previene que pestañas viejas guarden ayer.
-  date = todayStr();
-  document.getElementById('ent-date').value = date;
+  // La fecha del movimiento se respeta tal como el usuario la indica (puede ser anterior a hoy).
+  // El timestamp del registro siempre es el momento real de guardar (gestionado más abajo).
+  let date = document.getElementById('ent-date').value || todayStr();
   const resp = document.getElementById('ent-resp').value.trim();
   const notes = document.getElementById('ent-notes').value.trim();
-  const ot = document.getElementById('ent-ot') ? document.getElementById('ent-ot').value.trim() : '';
+  const ot = document.getElementById('ent-ot') ? normalizeOtInput(document.getElementById('ent-ot').value) : '';
+  if(isDevol && ot){ ensureOtExists(ot, ''); }
   const motivoDevol = isDevol ? document.getElementById('ent-motivo').value : '';
   const motivoOtro = (isDevol && motivoDevol === 'Otro') ? document.getElementById('ent-motivo-otro').value.trim() : '';
 
@@ -3277,6 +4172,7 @@ document.getElementById('form-entrada').addEventListener('submit', e=>{
   }
   if(isDevol){
     if(!ot){ toast('Ingresa la OT/actividad de origen (obligatorio en devolución)','err'); return; }
+    if(ot.length < 9){ toast(`El N° de OT debe tener al menos 9 caracteres (tiene ${ot.length}). Verifica que esté completo.`, 'err', 5500); return; }
     if(!motivoDevol){ toast('Selecciona el motivo de devolución','err'); return; }
     if(motivoDevol === 'Otro' && !motivoOtro){ toast('Describe el motivo "Otro"','err'); return; }
     const sinEstado = entFolioItems.filter(it => !it.estadoDevol);
@@ -3416,11 +4312,11 @@ document.getElementById('form-salida').addEventListener('submit', async e=>{
   const folio = document.getElementById('sal-folio').value.trim();
   const area = document.querySelector('#sal-areas input:checked')?.value;
   const destino = document.querySelector('#sal-destinos input:checked')?.value;
-    let date = document.getElementById('sal-date').value || todayStr();
-  date = todayStr();
-  document.getElementById('sal-date').value = date;
+  // La fecha del movimiento se respeta tal como el usuario la indica (puede ser anterior a hoy).
+  // El timestamp del registro siempre es el momento real de guardar.
+  let date = document.getElementById('sal-date').value || todayStr();
   const resp = document.getElementById('sal-resp').value.trim();
-  const ot = document.getElementById('sal-ot').value.trim();
+  const ot = normalizeOtInput(document.getElementById('sal-ot').value);
   const activity = document.getElementById('sal-act').value.trim();
   const notes = document.getElementById('sal-notes').value.trim();
 
@@ -3431,6 +4327,9 @@ document.getElementById('form-salida').addEventListener('submit', async e=>{
   // Autoconsumo = mismo taller de origen y destino (OT sigue siendo obligatoria)
   const isAutoconsumo = (area === destino);
   if(!ot){ toast('Indica la OT o N° de actividad','err'); return; }
+  if(ot.length < 9){ toast(`El N° de OT debe tener al menos 9 caracteres (tiene ${ot.length}). Verifica que esté completo.`, 'err', 5500); return; }
+  // Auto-crear OT si no existe (con el título tomado de la actividad si está)
+  ensureOtExists(ot, activity);
   if(!salFolioItems.length){
     toast('Agrega al menos un material al folio','err');
     return;
@@ -3918,11 +4817,14 @@ if(_formReserva){
     const destino = document.querySelector('#rsv-destinos input:checked')?.value;
     const due = document.getElementById('rsv-due').value || '';
     const resp = document.getElementById('rsv-resp').value.trim();
-    const ot = document.getElementById('rsv-ot').value.trim();
+    const ot = normalizeOtInput(document.getElementById('rsv-ot').value);
     const activity = document.getElementById('rsv-act').value.trim();
     const notes = document.getElementById('rsv-notes').value.trim();
 
     if(!ot){ toast('Indica la OT o N° de actividad','err'); return; }
+    if(ot.length < 9){ toast(`El N° de OT debe tener al menos 9 caracteres (tiene ${ot.length}). Verifica que esté completo.`, 'err', 5500); return; }
+    // Auto-crear OT si no existe
+    ensureOtExists(ot, activity);
     if(!area){ toast('Selecciona el área desde donde reservar','err'); return; }
     if(!destino){ toast('Selecciona el destino del material','err'); return; }
     if(!rsvFolioItems.length){
@@ -4109,7 +5011,13 @@ function getOtaPeriodRange(){
 function filterSalidasForOta(){
   const range = getOtaPeriodRange();
   let movs = state.movements.filter(m=>m.type === 'salida' && !m._adjustment);
-  if(range.from) movs = movs.filter(m => m.date >= range.from && m.date <= range.to);
+  if(range.from){
+    // Filtro por FECHA DE REGISTRO (timestamp): cuándo se ingresó al sistema.
+    movs = movs.filter(m => {
+      const regDate = m.timestamp ? m.timestamp.slice(0,10) : (m.date || '');
+      return regDate >= range.from && regDate <= range.to;
+    });
+  }
 
   const search = (document.getElementById('ota-search').value||'').toLowerCase().trim();
   const destino = document.getElementById('ota-destino').value || '';
@@ -4251,7 +5159,7 @@ function renderOtAnalysis(){
         ? '<span class="mv-badge-transfer" title="Transferencia entre talleres: descontó del origen y sumó al destino automáticamente">↔ Transferencia</span>'
         : '<span class="mv-badge-consumo" title="Consumo: descontó del origen únicamente">→ Consumo</span>';
       return `<tr class="ota-line-row ${isTransfer?'is-transfer':''}" ondblclick="openMovDetail(${m.id})" title="Doble click para ver detalle del folio y movimiento">
-        <td><b>${escHtml(fmtDate(m.date))}</b><br><small style="color:var(--muted);font-size:11px">${escHtml(m.timestamp ? m.timestamp.slice(11,16) : '')}</small></td>
+        <td>${escHtml(fmtDate(m.timestamp ? m.timestamp.slice(0,10) : m.date))}<br><small style="color:var(--muted);font-size:11px">${escHtml(m.timestamp ? m.timestamp.slice(11,16) : '')} · Fecha real: ${escHtml(fmtDate(m.date))}</small></td>
         ${grouping !== 'ot' ? `<td>${escHtml(m.ot||'(sin OT)')}</td>` : ''}
         <td><b>${escHtml(m.folio||'—')}</b></td>
         ${grouping !== 'material' ? `<td>${escHtml(m.material)}<br><small style="color:var(--muted);font-size:11px">${escHtml(m.sap||'')}</small></td>` : ''}
@@ -4342,10 +5250,13 @@ function renderOtAnalysis(){
     if(grouping !== 'ot') metaParts.push(`${distinctOts} OT${distinctOts===1?'':'s'}`);
 
     return `<div class="ota-group ${isOpen?'open':''}" data-key="${escHtml(key)}">
-      <div class="ota-group-h" onclick="this.parentElement.classList.toggle('open')">
+      <div class="ota-group-h" onclick="if(event.target.closest('.ota-edit-ot-btn'))return;this.parentElement.classList.toggle('open')">
         <div class="ota-group-icon">${iconLetter}</div>
         <div class="ota-group-title">
-          <div class="name">${escHtml(g.label)}</div>
+          <div class="name">${escHtml(g.label)}${(grouping === 'ot' && key !== '(sin OT)') ? `<button type="button" class="ota-edit-ot-btn" onclick="event.stopPropagation();openOtModalForKey('${escHtml(key)}')" title="Editar esta OT (cambiar número o título)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar OT
+          </button>` : ''}</div>
           <div class="meta">${escHtml(metaParts.join(' · '))}${g.sub?` · ${g.sub}`:''}</div>
         </div>
         <div class="ota-group-num">${g.total.toLocaleString('es-CL')}<small>unidades</small></div>
@@ -5499,9 +6410,14 @@ function getPeriodRange(period){
 function filterMovsByPeriod(period){
   const r = getPeriodRange(period);
   if(!r.from) return [];
+  // Filtro por FECHA DE REGISTRO (timestamp): cuándo se ingresó al sistema.
   // Adjustments (manual stock corrections) are NOT counted as real entries/exits
   // for dashboard analytics. They show up in Historial only.
-  return state.movements.filter(m=>m.date >= r.from && m.date <= r.to && !m._adjustment);
+  return state.movements.filter(m => {
+    if(m._adjustment) return false;
+    const regDate = m.timestamp ? m.timestamp.slice(0,10) : (m.date || '');
+    return regDate >= r.from && regDate <= r.to;
+  });
 }
 
 function setPeriod(p){
@@ -6784,8 +7700,17 @@ function renderHistorial(){
     }
   }
   if(area) rows = rows.filter(r=>r.area===area);
-  if(from) rows = rows.filter(r=>r.date >= from);
-  if(to)   rows = rows.filter(r=>r.date <= to);
+  // Filtros from/to por FECHA DE REGISTRO (timestamp).
+  // Para movimientos, timestamp es la fecha exacta de registro al sistema.
+  // Para reservas, r.date ya viene derivada de r.timestamp (mapeo arriba).
+  if(from) rows = rows.filter(r => {
+    const regDate = r.timestamp ? r.timestamp.slice(0,10) : r.date;
+    return regDate >= from;
+  });
+  if(to) rows = rows.filter(r => {
+    const regDate = r.timestamp ? r.timestamp.slice(0,10) : r.date;
+    return regDate <= to;
+  });
   if(search){
     rows = rows.filter(r=>{
       const dest = DEST_LABEL[r.destino] || r.destino || '';
@@ -6865,7 +7790,7 @@ function renderHistorial(){
             ? `<span class="tag" style="background:#F3E8FF;color:#6B21A8;border-color:#D8B4FE">♻ Autoconsumo</span>`
             : `<span class="tag ${r.type}">${r.type}</span>`);
     return `<tr>
-      <td>${escHtml(fmtDateTime(r.timestamp))}</td>
+      <td>${escHtml(fmtDate(r.timestamp ? r.timestamp.slice(0,10) : r.date))}<br><small style="color:var(--muted);font-size:11px">${escHtml(r.timestamp ? r.timestamp.slice(11,16) : '')} · Fecha real: ${escHtml(fmtDate(r.date))}</small></td>
       <td>${typeTag}</td>
       <td>${escHtml(r.material)}</td>
       <td class="sap">${escHtml(r.sap ?? '—')}</td>
@@ -8420,7 +9345,971 @@ function init(){
   setupSyncTimers();
   // Filter visual feedback (highlights active filters + clear-all button)
   setupFilterFeedback();
+  // OTs: poblar datalist y wire del formulario del modal
+  syncOtsFromMovements(false);  // Asegura que el catálogo tenga todas las OTs presentes en movimientos
+  poblarOtDatalist();
+  setupOtModal();
+  setupOtAutoFill();  // Wire auto-split de OT + auto-fill de descripción de actividad
+  // Poblar dropdowns de Análisis OT con TODOS los destinos y áreas definidos
+  poblarOtaDropdowns();
 }
+
+// Llena los <select> de filtro en Análisis OT desde los arrays DESTINOS y AREAS
+// para que nunca queden desincronizados con los datos reales.
+function poblarOtaDropdowns(){
+  const destEl = document.getElementById('ota-destino');
+  if(destEl){
+    // Conservar la opción "Todos los destinos" y agregar el resto
+    const current = destEl.value;
+    destEl.innerHTML = '<option value="">Todos los destinos</option>';
+    // Agrupar por tipo y grupo para mejor lectura
+    const warehouses = DESTINOS.filter(d => d.type === 'warehouse');
+    const consumption = DESTINOS.filter(d => d.type === 'consumption');
+    if(warehouses.length){
+      const og = document.createElement('optgroup');
+      og.label = '🏭 Bodegas / Talleres';
+      warehouses.forEach(d => {
+        const o = document.createElement('option');
+        o.value = d.key;
+        o.textContent = d.label;
+        og.appendChild(o);
+      });
+      destEl.appendChild(og);
+    }
+    // Agrupar destinos de consumo por su grupo (Chancado / Concentradora / PMFC / ...)
+    const grupos = {};
+    consumption.forEach(d => {
+      const g = d.grupo || 'Otros';
+      if(!grupos[g]) grupos[g] = [];
+      grupos[g].push(d);
+    });
+    Object.keys(grupos).forEach(g => {
+      const og = document.createElement('optgroup');
+      og.label = `⚙️ ${g}`;
+      grupos[g].forEach(d => {
+        const o = document.createElement('option');
+        o.value = d.key;
+        o.textContent = d.label;
+        og.appendChild(o);
+      });
+      destEl.appendChild(og);
+    });
+    // Restaurar selección previa si todavía existe
+    if(current && destEl.querySelector(`option[value="${CSS.escape(current)}"]`)){
+      destEl.value = current;
+    }
+  }
+  const areaEl = document.getElementById('ota-area');
+  if(areaEl){
+    const current = areaEl.value;
+    areaEl.innerHTML = '<option value="">Todas las áreas origen</option>';
+    AREAS.forEach(a => {
+      const o = document.createElement('option');
+      o.value = a.key;
+      o.textContent = a.label;
+      areaEl.appendChild(o);
+    });
+    if(current && areaEl.querySelector(`option[value="${CSS.escape(current)}"]`)){
+      areaEl.value = current;
+    }
+  }
+}
+window.poblarOtaDropdowns = poblarOtaDropdowns;
+
+// ============================================================
+//                  GESTIÓN DE OTs (Modal)
+// ============================================================
+
+// Validación: longitud mínima del número de OT
+const OT_MIN_LENGTH = 9;
+
+// Normaliza un input de OT (quita prefijos, espacios, separa título si vino del datalist)
+function normalizeOtInput(raw){
+  if(!raw) return '';
+  let v = String(raw).trim();
+  // Si vino del datalist en formato "1234 — Título", solo tomar el número
+  if(v.includes(' — ')) v = v.split(' — ')[0].trim();
+  // Quitar prefijos comunes: "OT-", "OT ", "ot-", "ot ", etc.
+  v = v.replace(/^(ot[\s\-_]*)/i, '');
+  // Quitar espacios internos
+  v = v.replace(/\s+/g, '');
+  return v;
+}
+
+// Busca una OT por su número (después de normalizar)
+function findOtByNumero(numero){
+  const norm = normalizeOtInput(numero);
+  if(!norm) return null;
+  return (state.ots || []).find(ot => ot.numero === norm) || null;
+}
+
+// Asegura que la OT exista en el catálogo. Si no, la crea con el título sugerido.
+function ensureOtExists(numero, suggestedTitle){
+  const norm = normalizeOtInput(numero);
+  if(!norm) return null;
+  // Validar longitud mínima antes de crear (las muy cortas son típicamente typos)
+  if(norm.length < OT_MIN_LENGTH){
+    if(typeof toast === 'function'){
+      toast(`OT "${norm}" tiene solo ${norm.length} caracteres. Debe tener al menos ${OT_MIN_LENGTH}. Verifica el número.`, 'warn', 5500);
+    }
+    // Igual la guardamos pero marcada como "corta" para que aparezca en el modal y se pueda corregir
+  }
+  let ot = findOtByNumero(norm);
+  if(ot){
+    // Si existe pero no tiene título y ahora tenemos uno sugerido, completarlo
+    if(!ot.titulo && suggestedTitle && suggestedTitle.trim()){
+      ot.titulo = suggestedTitle.trim();
+      saveState();
+      poblarOtDatalist();
+      try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_updated', ot)); }catch(e){}
+    }
+    return ot;
+  }
+  // Crear nueva OT
+  if(!Array.isArray(state.ots)) state.ots = [];
+  if(typeof state.nextOtId !== 'number') state.nextOtId = 1;
+  ot = {
+    id: state.nextOtId++,
+    numero: norm,
+    titulo: (suggestedTitle || '').trim(),
+    createdAt: new Date().toISOString(),
+    createdBy: state.user || '—',
+    isAutoCreated: true,
+  };
+  state.ots.push(ot);
+  saveState();
+  poblarOtDatalist();
+  try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_created', ot)); }catch(e){}
+  if(typeof toast === 'function'){
+    toast(`Nueva OT ${norm} agregada al catálogo${ot.titulo ? ' (con título)' : ' (sin título)'}.`, 'ok', 4000);
+  }
+  return ot;
+}
+
+// Poblar el datalist compartido con todas las OTs ordenadas por uso reciente
+function poblarOtDatalist(){
+  const dl = document.getElementById('ot-datalist');
+  if(!dl) return;
+  const ots = (state.ots || []).slice();
+  const useScore = new Map();
+  (state.movements || []).forEach(mv => {
+    const n = normalizeOtInput(mv.ot);
+    if(!n) return;
+    const cur = useScore.get(n) || { count: 0, lastTs: '' };
+    cur.count++;
+    if(mv.timestamp && mv.timestamp > cur.lastTs) cur.lastTs = mv.timestamp;
+    useScore.set(n, cur);
+  });
+  ots.sort((a, b) => {
+    const sa = useScore.get(a.numero) || { lastTs: '', count: 0 };
+    const sb = useScore.get(b.numero) || { lastTs: '', count: 0 };
+    if(sa.lastTs !== sb.lastTs) return sb.lastTs.localeCompare(sa.lastTs);
+    return sb.count - sa.count;
+  });
+  dl.innerHTML = ots.map(ot => {
+    const label = ot.titulo ? `${ot.numero} — ${ot.titulo}` : ot.numero;
+    return `<option value="${escHtml(label)}"></option>`;
+  }).join('');
+}
+
+// Auto-fill: cuando el usuario selecciona una OT del autocompletado, separa el número
+// del título. El número queda en el campo OT, y el título se pone en "Descripción de la
+// actividad" (si está vacío). El usuario puede editar la descripción independientemente.
+function setupOtAutoFill(){
+  // Pares: campo OT → campo de descripción de actividad asociado
+  const pairs = [
+    { ot: 'sal-ot', act: 'sal-act' },
+    { ot: 'rsv-ot', act: 'rsv-act' }
+    // ent-ot no tiene campo de actividad asociado (entrada usa "motivo de devolución")
+  ];
+  pairs.forEach(p => {
+    const otEl = document.getElementById(p.ot);
+    if(!otEl || otEl.dataset.autofillWired) return;
+    otEl.dataset.autofillWired = '1';
+    const handler = () => {
+      const raw = otEl.value;
+      if(!raw.includes(' — ')) return;
+      // Separar "12345 — Cambio bomba SAG 5" en "12345" y "Cambio bomba SAG 5"
+      const idx = raw.indexOf(' — ');
+      const num = raw.slice(0, idx).trim();
+      const title = raw.slice(idx + 3).trim();
+      // Reemplazar el campo OT con solo el número
+      otEl.value = num;
+      // Auto-llenar la descripción de actividad si está vacía (no sobreescribir lo que el usuario escribió)
+      if(title && p.act){
+        const actEl = document.getElementById(p.act);
+        if(actEl && !actEl.value.trim()){
+          actEl.value = title;
+          // Pequeño efecto visual para que el usuario vea que se llenó solo
+          actEl.style.transition = 'background-color .4s';
+          actEl.style.backgroundColor = '#E1F5E8';
+          setTimeout(() => { actEl.style.backgroundColor = ''; }, 600);
+        }
+      }
+    };
+    otEl.addEventListener('input', handler);
+    otEl.addEventListener('change', handler);
+  });
+  // Para ent-ot (entrada/devolución): solo split del número, sin auto-fill de actividad
+  const entOt = document.getElementById('ent-ot');
+  if(entOt && !entOt.dataset.autofillWired){
+    entOt.dataset.autofillWired = '1';
+    const h = () => {
+      const raw = entOt.value;
+      if(!raw.includes(' — ')) return;
+      const idx = raw.indexOf(' — ');
+      entOt.value = raw.slice(0, idx).trim();
+    };
+    entOt.addEventListener('input', h);
+    entOt.addEventListener('change', h);
+  }
+}
+window.setupOtAutoFill = setupOtAutoFill;
+
+// Sincroniza el catálogo de OTs con las que aparecen en movimientos y reservas.
+function syncOtsFromMovements(showToast){
+  if(!Array.isArray(state.ots)) state.ots = [];
+  if(typeof state.nextOtId !== 'number') state.nextOtId = 1;
+  const existing = new Set(state.ots.map(o => o.numero));
+  const found = new Map();
+  const collect = (rawOt, activity, timestamp) => {
+    const n = normalizeOtInput(rawOt);
+    if(!n) return;
+    if(!found.has(n)) found.set(n, { firstTs: timestamp || '', activities: [] });
+    const entry = found.get(n);
+    if(activity && activity.trim() && entry.activities.length < 3){
+      entry.activities.push(activity.trim());
+    }
+    if(timestamp && (!entry.firstTs || timestamp < entry.firstTs)){
+      entry.firstTs = timestamp;
+    }
+  };
+  (state.movements || []).forEach(mv => collect(mv.ot, mv.activity, mv.timestamp));
+  (state.reservations || []).forEach(r => collect(r.ot, r.activity, r.timestamp));
+  let added = 0;
+  found.forEach((entry, numero) => {
+    if(existing.has(numero)) return;
+    let titulo = '';
+    if(entry.activities.length){
+      const freq = {};
+      entry.activities.forEach(a => { freq[a] = (freq[a]||0) + 1; });
+      titulo = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0];
+    }
+    state.ots.push({
+      id: state.nextOtId++,
+      numero,
+      titulo,
+      createdAt: entry.firstTs || new Date().toISOString(),
+      createdBy: 'sincronización automática',
+      isAutoCreated: true,
+    });
+    added++;
+  });
+  if(added > 0){
+    saveState();
+    poblarOtDatalist();
+    if(showToast){
+      toast(`✓ ${added} OT${added===1?'':'s'} agregada${added===1?'':'s'} al catálogo desde movimientos/reservas.`, 'ok', 4500);
+    }
+  } else if(showToast){
+    toast('El catálogo ya está sincronizado. Todas las OTs presentes en movimientos están registradas.', 'ok', 3500);
+  }
+  return added;
+}
+
+function openOtModal(prefillNumero){
+  const modal = document.getElementById('ot-modal');
+  if(!modal) return;
+  // Auto-sincronizar: agrega al catálogo cualquier OT que esté en movimientos/reservas pero no esté registrada
+  syncOtsFromMovements(false);
+  modal.classList.add('open');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Limpiar formulario en modo "crear"
+  otmCancelEdit();
+  // Si vino con un número pre-llenado, ponerlo en el form de edición (modo edit por número)
+  if(prefillNumero){
+    const ot = findOtByNumero(prefillNumero);
+    if(ot){
+      otmStartEdit(ot.id);
+    } else {
+      document.getElementById('otm-numero').value = normalizeOtInput(prefillNumero);
+    }
+  }
+  renderOtModalTable();
+  setTimeout(() => {
+    const focusEl = document.getElementById('otm-numero');
+    if(focusEl) focusEl.focus();
+  }, 100);
+}
+function closeOtModal(){
+  const modal = document.getElementById('ot-modal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+  otmCancelEdit();
+}
+
+// SETUP UNICO DEL MODAL (event listeners)
+function setupOtModal(){
+  const form = document.getElementById('otm-form');
+  if(form && !form.dataset.wired){
+    form.dataset.wired = '1';
+    form.addEventListener('submit', otmHandleSubmit);
+  }
+  const search = document.getElementById('otm-search');
+  const filter = document.getElementById('otm-filter');
+  if(search && !search.dataset.wired){ search.dataset.wired = '1'; search.addEventListener('input', renderOtModalTable); }
+  if(filter && !filter.dataset.wired){ filter.dataset.wired = '1'; filter.addEventListener('change', renderOtModalTable); }
+  // NO cerramos al hacer click en el fondo — solo con el botón X o "Cerrar" para evitar
+  // cierres accidentales cuando el usuario toca el borde del modal por error.
+  // Cerrar con tecla ESC sí está permitido (primero el sub-modal de merge si está abierto)
+  if(!document.body.dataset.otModalEsc){
+    document.body.dataset.otModalEsc = '1';
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        const mergeOverlay = document.getElementById('otm-merge-overlay');
+        if(mergeOverlay && mergeOverlay.classList.contains('open')){
+          closeMergeModal();
+          return;
+        }
+        const m = document.getElementById('ot-modal');
+        if(m && m.classList.contains('open')) closeOtModal();
+      }
+    });
+  }
+  // Detectar cambio en el número durante edición para mostrar advertencia de fusión + contador de longitud
+  const numInput = document.getElementById('otm-numero');
+  if(numInput && !numInput.dataset.wired){
+    numInput.dataset.wired = '1';
+    numInput.addEventListener('input', () => { otmCheckMergeWarning(); otmUpdateLenCounter(); });
+  }
+}
+
+// Actualiza el contador "x/9 caracteres" en vivo
+function otmUpdateLenCounter(){
+  const input = document.getElementById('otm-numero');
+  const counter = document.getElementById('otm-len-counter');
+  if(!input || !counter) return;
+  const len = normalizeOtInput(input.value).length;
+  if(len === 0){
+    counter.textContent = `mín. ${OT_MIN_LENGTH} caracteres`;
+    counter.className = 'otm-len-counter';
+  } else if(len < OT_MIN_LENGTH){
+    counter.textContent = `${len} / ${OT_MIN_LENGTH} caracteres (faltan ${OT_MIN_LENGTH - len})`;
+    counter.className = 'otm-len-counter is-invalid';
+  } else {
+    counter.textContent = `✓ ${len} caracteres`;
+    counter.className = 'otm-len-counter is-valid';
+  }
+}
+
+// ARRANCAR EDICIÓN de una OT existente (llena el formulario con sus datos)
+function otmStartEdit(id){
+  const ot = (state.ots || []).find(o => o.id === id);
+  if(!ot) return;
+  document.getElementById('otm-edit-id').value = String(ot.id);
+  document.getElementById('otm-numero').value = ot.numero;
+  document.getElementById('otm-titulo').value = ot.titulo || '';
+  const boxEl = document.getElementById('otm-form-box');
+  boxEl.style.display = '';   // mostrar el formulario (estaba oculto)
+  boxEl.classList.add('is-editing');
+  const hEl = document.getElementById('otm-form-h');
+  if(hEl) hEl.querySelector('span').textContent = `Editando OT ${ot.numero}`;
+  const subEl = document.getElementById('otm-form-sub');
+  if(subEl) subEl.textContent = 'Cambia el número o el título. Si el nuevo número ya existe, se fusionarán automáticamente las dos OTs.';
+  document.getElementById('otm-submit-label').textContent = 'Guardar cambios';
+  document.getElementById('otm-cancel-edit').style.display = '';
+  // Cambiar el ícono del header a un lápiz
+  const iconEl = document.getElementById('otm-form-icon');
+  if(iconEl){
+    iconEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  }
+  otmCheckMergeWarning();
+  otmUpdateLenCounter();
+  // Scroll al form
+  document.getElementById('otm-form-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// CANCELAR EDICIÓN (vuelve al modo "crear nueva")
+function otmCancelEdit(){
+  const editIdEl = document.getElementById('otm-edit-id');
+  const numEl = document.getElementById('otm-numero');
+  const titEl = document.getElementById('otm-titulo');
+  const boxEl = document.getElementById('otm-form-box');
+  const hEl = document.getElementById('otm-form-h');
+  const subEl = document.getElementById('otm-form-sub');
+  const lblEl = document.getElementById('otm-submit-label');
+  const cancelBtn = document.getElementById('otm-cancel-edit');
+  const warn = document.getElementById('otm-merge-warning');
+  const iconEl = document.getElementById('otm-form-icon');
+  if(editIdEl) editIdEl.value = '';
+  if(numEl) numEl.value = '';
+  if(titEl) titEl.value = '';
+  if(boxEl){ boxEl.classList.remove('is-editing'); boxEl.style.display = 'none'; }  // ocultar formulario
+  if(hEl) hEl.querySelector('span').textContent = 'Crear nueva OT';
+  if(subEl) subEl.textContent = 'Ingresa el número y opcionalmente un título descriptivo.';
+  if(lblEl) lblEl.textContent = 'Agregar OT';
+  if(cancelBtn) cancelBtn.style.display = 'none';
+  if(warn) warn.style.display = 'none';
+  // Restaurar ícono "+"
+  if(iconEl){
+    iconEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  }
+  otmUpdateLenCounter();
+}
+
+// VERIFICAR SI EL CAMBIO DE NÚMERO ES UNA FUSIÓN (la nueva OT ya existe)
+function otmCheckMergeWarning(){
+  const editId = parseInt(document.getElementById('otm-edit-id').value);
+  const warn = document.getElementById('otm-merge-warning');
+  if(!editId){ if(warn) warn.style.display = 'none'; return; }
+  const newNum = normalizeOtInput(document.getElementById('otm-numero').value);
+  const current = state.ots.find(o => o.id === editId);
+  if(!current || !newNum){ warn.style.display = 'none'; return; }
+  if(newNum === current.numero){ warn.style.display = 'none'; return; }
+  const existing = state.ots.find(o => o.numero === newNum && o.id !== editId);
+  if(existing){
+    // Contar movimientos y reservas que se fusionarán
+    const movsToMove = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === current.numero).length;
+    const rsvToMove = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === current.numero).length;
+    warn.innerHTML = `<b>⚠ Se fusionarán dos OTs:</b><br>
+      La OT <b>${escHtml(current.numero)}</b>${current.titulo ? ` (${escHtml(current.titulo)})` : ''} dejará de existir.<br>
+      Todos sus <b>${movsToMove} movimientos</b> y <b>${rsvToMove} reservas</b> se reasignarán a la OT <b>${escHtml(existing.numero)}</b>${existing.titulo ? ` (${escHtml(existing.titulo)})` : ''}.`;
+    warn.style.display = 'block';
+  } else {
+    // No es fusión: solo renombrar
+    const movsToUpdate = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === current.numero).length;
+    const rsvToUpdate = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === current.numero).length;
+    if(movsToUpdate > 0 || rsvToUpdate > 0){
+      warn.innerHTML = `<b>📝 Renombrar número:</b><br>
+        Se actualizarán <b>${movsToUpdate} movimientos</b> y <b>${rsvToUpdate} reservas</b> que tienen la OT <b>${escHtml(current.numero)}</b> para que apunten a <b>${escHtml(newNum)}</b>.`;
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+}
+
+// HANDLER DEL SUBMIT (crear o editar/fusionar)
+async function otmHandleSubmit(e){
+  e.preventDefault();
+  const editId = parseInt(document.getElementById('otm-edit-id').value);
+  const numRaw = document.getElementById('otm-numero').value;
+  const tituloRaw = document.getElementById('otm-titulo').value;
+  const numero = normalizeOtInput(numRaw);
+  const titulo = (tituloRaw || '').trim();
+  if(!numero){ toast('Ingresa el número de OT', 'err'); return; }
+  // Validar longitud mínima — pero permitir que se edite el TÍTULO de una OT existente
+  // aunque su número sea corto (heredado de un error antiguo). Solo bloqueamos si el número
+  // está siendo cambiado a otro corto, o si se está creando una OT nueva.
+  if(numero.length < OT_MIN_LENGTH){
+    const isEditingSameShortNumber = editId && state.ots.find(o => o.id === editId && o.numero === numero);
+    if(!isEditingSameShortNumber){
+      toast(`El N° de OT debe tener al menos ${OT_MIN_LENGTH} caracteres (tiene ${numero.length}). Para corregir una OT errónea, usa el botón "Fusionar" en la fila.`, 'err', 6500);
+      return;
+    }
+  }
+
+  // MODO CREAR (no hay edit id)
+  if(!editId){
+    const existing = findOtByNumero(numero);
+    if(existing){
+      if(!existing.titulo && titulo){
+        existing.titulo = titulo;
+        existing.isAutoCreated = false;
+        saveState();
+        poblarOtDatalist();
+        renderOtModalTable();
+        try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_updated', existing)); }catch(e){}
+        toast(`Título agregado a la OT ${numero}.`, 'ok');
+        otmCancelEdit();
+      } else {
+        toast(`La OT ${numero} ya existe${existing.titulo ? `: "${existing.titulo}"` : ''}.`, 'warn', 4500);
+      }
+      return;
+    }
+    const ot = {
+      id: state.nextOtId++,
+      numero, titulo,
+      createdAt: new Date().toISOString(),
+      createdBy: state.user || '—',
+      isAutoCreated: false,
+    };
+    state.ots.push(ot);
+    saveState();
+    poblarOtDatalist();
+    renderOtModalTable();
+    try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_created', ot)); }catch(e){}
+    toast(`OT ${numero} creada.`, 'ok');
+    otmCancelEdit();
+    return;
+  }
+
+  // MODO EDITAR
+  const current = state.ots.find(o => o.id === editId);
+  if(!current){ toast('OT no encontrada', 'err'); return; }
+  const oldNumero = current.numero;
+  const changedNumber = oldNumero !== numero;
+
+  if(changedNumber){
+    // ¿Fusión con OT existente?
+    const target = state.ots.find(o => o.numero === numero && o.id !== editId);
+    if(target){
+      const movsToMove = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === oldNumero);
+      const rsvToMove = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === oldNumero);
+      const ok = await confirmDialog(
+        `¿Fusionar OT ${oldNumero} → ${numero}?`,
+        `La OT ${oldNumero}${current.titulo ? ` ("${current.titulo}")` : ''} dejará de existir.\n\n${movsToMove.length} movimientos y ${rsvToMove.length} reservas se reasignarán a la OT ${numero}${target.titulo ? ` ("${target.titulo}")` : ''}.\n\nEsta acción no se puede deshacer.`,
+        'Sí, fusionar', true
+      );
+      if(!ok) return;
+      // Reasignar
+      movsToMove.forEach(mv => { mv.ot = target.numero; });
+      rsvToMove.forEach(r => { r.ot = target.numero; });
+      // Si se proporcionó título nuevo, actualizarlo en el target
+      if(titulo && titulo !== target.titulo){ target.titulo = titulo; }
+      // Eliminar la OT actual del catálogo
+      state.ots = state.ots.filter(o => o.id !== editId);
+      saveState();
+      poblarOtDatalist();
+      renderOtModalTable();
+      // Re-renderizar análisis OT si está visible
+      try{ if(typeof renderOtAnalysis === 'function' && document.getElementById('view-otanalysis').classList.contains('active')) renderOtAnalysis(); }catch(e){}
+      try{ if(typeof syncPushEvent === 'function'){
+        syncPushEvent(buildOtEvent('ot_merged', { id: editId, numero: oldNumero, titulo: current.titulo, mergedInto: target.numero }));
+        syncPushEvent(buildOtEvent('ot_updated', target));
+      }}catch(e){}
+      toast(`Fusionadas: ${movsToMove.length} movimientos + ${rsvToMove.length} reservas reasignados a OT ${target.numero}.`, 'ok', 5000);
+      otmCancelEdit();
+      return;
+    }
+    // No es fusión: renombrar
+    const movsToUpdate = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === oldNumero);
+    const rsvToUpdate = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === oldNumero);
+    if(movsToUpdate.length > 0 || rsvToUpdate.length > 0){
+      const ok = await confirmDialog(
+        `¿Renombrar OT ${oldNumero} → ${numero}?`,
+        `Se actualizarán ${movsToUpdate.length} movimientos y ${rsvToUpdate.length} reservas que tienen la OT ${oldNumero} para que apunten al nuevo número ${numero}.`,
+        'Sí, renombrar', false
+      );
+      if(!ok) return;
+      movsToUpdate.forEach(mv => { mv.ot = numero; });
+      rsvToUpdate.forEach(r => { r.ot = numero; });
+    }
+    current.numero = numero;
+    current.titulo = titulo;
+    current.isAutoCreated = false;
+    saveState();
+    poblarOtDatalist();
+    renderOtModalTable();
+    try{ if(typeof renderOtAnalysis === 'function' && document.getElementById('view-otanalysis').classList.contains('active')) renderOtAnalysis(); }catch(e){}
+    try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_updated', current)); }catch(e){}
+    toast(`OT renombrada: ${oldNumero} → ${numero}. ${movsToUpdate.length + rsvToUpdate.length} registros actualizados.`, 'ok', 4500);
+    otmCancelEdit();
+    return;
+  }
+
+  // Solo cambió el título (no el número)
+  if(current.titulo !== titulo){
+    current.titulo = titulo;
+    current.isAutoCreated = false;
+    saveState();
+    poblarOtDatalist();
+    renderOtModalTable();
+    try{ if(typeof renderOtAnalysis === 'function' && document.getElementById('view-otanalysis').classList.contains('active')) renderOtAnalysis(); }catch(e){}
+    try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_updated', current)); }catch(e){}
+    toast(`OT ${current.numero} actualizada.`, 'ok');
+    otmCancelEdit();
+  } else {
+    toast('No hay cambios para guardar.', 'warn', 2500);
+  }
+}
+
+// RENDER de la tabla dentro del modal
+function renderOtModalTable(){
+  if(!Array.isArray(state.ots)) state.ots = [];
+  const ots = state.ots.slice();
+  // Contar movimientos y reservas por OT
+  const movCount = new Map();
+  const rsvCount = new Map();
+  (state.movements || []).forEach(mv => {
+    const n = normalizeOtInput(mv.ot);
+    if(!n) return;
+    movCount.set(n, (movCount.get(n) || 0) + 1);
+  });
+  (state.reservations || []).forEach(r => {
+    const n = normalizeOtInput(r.ot);
+    if(!n) return;
+    rsvCount.set(n, (rsvCount.get(n) || 0) + 1);
+  });
+  // KPIs
+  const total = ots.length;
+  const errors = ots.filter(o => o.numero.length < OT_MIN_LENGTH).length;
+  const untitled = ots.filter(o => !o.titulo).length;
+  const active = ots.filter(o => (movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0).length;
+  const setKpi = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setKpi('otm-kpi-total', total.toLocaleString('es-CL'));
+  setKpi('otm-kpi-errors', errors.toLocaleString('es-CL'));
+  setKpi('otm-kpi-untitled', untitled.toLocaleString('es-CL'));
+  setKpi('otm-kpi-active', active.toLocaleString('es-CL'));
+  // Animar el KPI de errores si hay alguno
+  const errCard = document.getElementById('otm-kpi-errors-card');
+  if(errCard) errCard.classList.toggle('has-errors', errors > 0);
+  // Filtros
+  const searchVal = (document.getElementById('otm-search')?.value || '').toLowerCase().trim();
+  const filterVal = document.getElementById('otm-filter')?.value || 'all';
+  let filtered = ots;
+  if(filterVal === 'errors') filtered = filtered.filter(o => o.numero.length < OT_MIN_LENGTH);
+  else if(filterVal === 'untitled') filtered = filtered.filter(o => !o.titulo);
+  else if(filterVal === 'active') filtered = filtered.filter(o => (movCount.get(o.numero) || 0) > 0 || (rsvCount.get(o.numero) || 0) > 0);
+  else if(filterVal === 'empty') filtered = filtered.filter(o => !(movCount.get(o.numero) > 0 || rsvCount.get(o.numero) > 0));
+  if(searchVal){
+    filtered = filtered.filter(o =>
+      o.numero.toLowerCase().includes(searchVal) ||
+      (o.titulo || '').toLowerCase().includes(searchVal)
+    );
+  }
+  // Ordenar: si filtro = errores, mostrar primero los más usados (más impacto al corregir)
+  if(filterVal === 'errors'){
+    filtered.sort((a, b) => {
+      const ca = (movCount.get(a.numero) || 0) + (rsvCount.get(a.numero) || 0);
+      const cb = (movCount.get(b.numero) || 0) + (rsvCount.get(b.numero) || 0);
+      return cb - ca;
+    });
+  } else {
+    filtered.sort((a, b) => {
+      const ca = (movCount.get(a.numero) || 0) + (rsvCount.get(a.numero) || 0);
+      const cb = (movCount.get(b.numero) || 0) + (rsvCount.get(b.numero) || 0);
+      if(cb !== ca) return cb - ca;
+      return (b.createdAt || '').localeCompare(a.createdAt || '');
+    });
+  }
+  const cnt = document.getElementById('otm-count');
+  if(cnt) cnt.textContent = `${filtered.length} OT${filtered.length === 1 ? '' : 's'}`;
+  const tbody = document.querySelector('#otm-tbl tbody');
+  if(!tbody) return;
+  if(filtered.length === 0){
+    const emptyMsg = filterVal === 'errors'
+      ? '🎉 No hay OTs con errores. Todas tienen al menos 9 caracteres.'
+      : 'Sin OTs que coincidan.';
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">${emptyMsg}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(ot => {
+    const mc = movCount.get(ot.numero) || 0;
+    const rc = rsvCount.get(ot.numero) || 0;
+    const isError = ot.numero.length < OT_MIN_LENGTH;
+    const tituloHtml = ot.titulo
+      ? escHtml(ot.titulo)
+      : `<span style="color:#9A6F00;font-style:italic">— sin título —</span>`;
+    const autoTag = ot.isAutoCreated ? `<span class="otm-auto-tag">AUTO</span>` : '';
+    const errTag = isError ? `<span class="otm-err-tag" title="Número con menos de ${OT_MIN_LENGTH} caracteres — posible error">⚠ ERROR</span>` : '';
+    const canDelete = (mc + rc) === 0;
+    // Mostrar botón "Fusionar" si la OT tiene movimientos/reservas o es un error (cualquiera de los dos justifica fusionar)
+    const canMerge = (mc + rc) > 0 || isError;
+    const rowClass = (!ot.titulo ? 'is-untitled ' : '') + (isError ? 'is-error' : '');
+    return `<tr class="${rowClass}">
+      <td><span class="otm-num-cell">${escHtml(ot.numero)}</span>${autoTag}${errTag}</td>
+      <td>${tituloHtml}</td>
+      <td class="num">${mc}</td>
+      <td class="num">${rc}</td>
+      <td>
+        <div class="otm-row-actions">
+          <button class="btn btn-edit" onclick="otmStartEdit(${ot.id})" title="Editar título o número">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar
+          </button>
+          ${canMerge ? `<button class="btn btn-merge" onclick="openMergeModal(${ot.id})" title="Fusionar con otra OT existente (reasigna materiales)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            Fusionar
+          </button>` : ''}
+          ${canDelete ? `<button class="btn btn-del" onclick="deleteOt(${ot.id})" title="Eliminar">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// Filtra rápido por errores al hacer click en el KPI rojo
+function otmFilterByErrors(){
+  const filter = document.getElementById('otm-filter');
+  if(!filter) return;
+  filter.value = 'errors';
+  renderOtModalTable();
+}
+
+// ============================================================
+//             SUB-MODAL: FUSIONAR OTs (picker de destino)
+// ============================================================
+
+let _otmMergeSourceId = null;   // id de la OT origen (la que se va a fusionar)
+let _otmMergeTargetId = null;   // id de la OT destino (seleccionada en el picker)
+
+function openMergeModal(sourceId){
+  const source = (state.ots || []).find(o => o.id === sourceId);
+  if(!source){ toast('OT no encontrada', 'err'); return; }
+  _otmMergeSourceId = sourceId;
+  _otmMergeTargetId = null;
+  // Llenar la info del source
+  const mc = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === source.numero).length;
+  const rc = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === source.numero).length;
+  const isErr = source.numero.length < OT_MIN_LENGTH;
+  const infoEl = document.getElementById('otm-merge-source-info');
+  if(infoEl){
+    infoEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;color:#7A5500;text-transform:uppercase;letter-spacing:.4px;font-weight:700;margin-bottom:2px">OT origen (se eliminará después de fusionar)</div>
+          <div><b>${escHtml(source.numero)}</b>${isErr ? ' <span class="otm-err-tag">⚠ ERROR</span>' : ''}${source.titulo ? ` <span style="color:var(--ink-2)">— ${escHtml(source.titulo)}</span>` : ' <span style="color:#9A6F00;font-style:italic">— sin título —</span>'}</div>
+        </div>
+        <div style="font-size:12px;color:#7A5500;text-align:right">
+          <b style="font-size:14px">${mc}</b> movimientos<br>
+          <b style="font-size:14px">${rc}</b> reservas
+        </div>
+      </div>`;
+  }
+  // Limpiar búsqueda y renderizar lista
+  const searchEl = document.getElementById('otm-merge-search');
+  if(searchEl) searchEl.value = '';
+  renderMergeList();
+  // Wire search
+  if(searchEl && !searchEl.dataset.wired){
+    searchEl.dataset.wired = '1';
+    searchEl.addEventListener('input', renderMergeList);
+  }
+  // Mostrar overlay
+  const overlay = document.getElementById('otm-merge-overlay');
+  if(overlay){
+    overlay.classList.add('open');
+    setTimeout(() => searchEl?.focus(), 100);
+  }
+  // Estado del botón confirmar
+  const btn = document.getElementById('otm-merge-confirm-btn');
+  if(btn) btn.disabled = true;
+  const foot = document.getElementById('otm-merge-foot-info');
+  if(foot) foot.textContent = 'Selecciona una OT destino…';
+}
+
+function closeMergeModal(){
+  const overlay = document.getElementById('otm-merge-overlay');
+  if(overlay) overlay.classList.remove('open');
+  _otmMergeSourceId = null;
+  _otmMergeTargetId = null;
+}
+
+function renderMergeList(){
+  const source = (state.ots || []).find(o => o.id === _otmMergeSourceId);
+  if(!source) return;
+  const search = (document.getElementById('otm-merge-search')?.value || '').toLowerCase().trim();
+  // Candidatos: todas las OTs excepto la fuente, ordenadas: 1) ≥9 chars primero (correctas), 2) con título, 3) más usadas
+  const movCount = new Map();
+  const rsvCount = new Map();
+  (state.movements || []).forEach(mv => {
+    const n = normalizeOtInput(mv.ot);
+    if(n) movCount.set(n, (movCount.get(n) || 0) + 1);
+  });
+  (state.reservations || []).forEach(r => {
+    const n = normalizeOtInput(r.ot);
+    if(n) rsvCount.set(n, (rsvCount.get(n) || 0) + 1);
+  });
+  let candidates = (state.ots || []).filter(o => o.id !== _otmMergeSourceId);
+  if(search){
+    candidates = candidates.filter(o =>
+      o.numero.toLowerCase().includes(search) ||
+      (o.titulo || '').toLowerCase().includes(search)
+    );
+  }
+  candidates.sort((a, b) => {
+    // Prioridad 1: OTs sin error de longitud primero
+    const aErr = a.numero.length < OT_MIN_LENGTH ? 1 : 0;
+    const bErr = b.numero.length < OT_MIN_LENGTH ? 1 : 0;
+    if(aErr !== bErr) return aErr - bErr;
+    // Prioridad 2: con título primero
+    const aHasTitle = a.titulo ? 0 : 1;
+    const bHasTitle = b.titulo ? 0 : 1;
+    if(aHasTitle !== bHasTitle) return aHasTitle - bHasTitle;
+    // Prioridad 3: más actividad primero
+    const ca = (movCount.get(a.numero) || 0) + (rsvCount.get(a.numero) || 0);
+    const cb = (movCount.get(b.numero) || 0) + (rsvCount.get(b.numero) || 0);
+    return cb - ca;
+  });
+  const listEl = document.getElementById('otm-merge-list');
+  if(!listEl) return;
+  if(candidates.length === 0){
+    listEl.innerHTML = `<div class="otm-merge-list-empty">Sin OTs que coincidan con la búsqueda.</div>`;
+    return;
+  }
+  listEl.innerHTML = candidates.map(ot => {
+    const mc = movCount.get(ot.numero) || 0;
+    const rc = rsvCount.get(ot.numero) || 0;
+    const isErr = ot.numero.length < OT_MIN_LENGTH;
+    const titleHtml = ot.titulo
+      ? escHtml(ot.titulo)
+      : '<span class="is-empty">— sin título —</span>';
+    const sel = ot.id === _otmMergeTargetId ? 'selected' : '';
+    return `<div class="otm-merge-item ${sel}" onclick="selectMergeTarget(${ot.id})">
+      <div class="otm-merge-item-radio"></div>
+      <div class="otm-merge-item-info">
+        <div class="otm-merge-item-num">${escHtml(ot.numero)}${isErr ? ' <span class="otm-err-tag" style="font-size:9px">⚠</span>' : ''}</div>
+        <div class="otm-merge-item-title ${ot.titulo ? '' : 'is-empty'}">${titleHtml}</div>
+      </div>
+      <div class="otm-merge-item-stats">
+        ${mc} mov.<br>${rc} rsv.
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectMergeTarget(targetId){
+  _otmMergeTargetId = targetId;
+  const target = (state.ots || []).find(o => o.id === targetId);
+  const source = (state.ots || []).find(o => o.id === _otmMergeSourceId);
+  if(!target || !source){ return; }
+  // Re-render para actualizar el "selected"
+  renderMergeList();
+  // Habilitar botón confirmar
+  const btn = document.getElementById('otm-merge-confirm-btn');
+  if(btn) btn.disabled = false;
+  // Mostrar info de qué se reasignará
+  const mc = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === source.numero).length;
+  const rc = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === source.numero).length;
+  const foot = document.getElementById('otm-merge-foot-info');
+  if(foot){
+    foot.innerHTML = `Se reasignarán <b>${mc} movimientos</b> y <b>${rc} reservas</b> a la OT <b>${escHtml(target.numero)}</b>${target.titulo ? ` (${escHtml(target.titulo)})` : ''}.`;
+  }
+}
+
+async function otmConfirmMerge(){
+  if(!_otmMergeSourceId || !_otmMergeTargetId){ toast('Selecciona la OT destino', 'err'); return; }
+  const source = (state.ots || []).find(o => o.id === _otmMergeSourceId);
+  const target = (state.ots || []).find(o => o.id === _otmMergeTargetId);
+  if(!source || !target){ toast('Error: OT no encontrada', 'err'); return; }
+  const movsToMove = (state.movements || []).filter(mv => normalizeOtInput(mv.ot) === source.numero);
+  const rsvToMove = (state.reservations || []).filter(r => normalizeOtInput(r.ot) === source.numero);
+  const ok = await confirmDialog(
+    `¿Fusionar OT ${source.numero} → ${target.numero}?`,
+    `La OT ${source.numero}${source.titulo ? ` ("${source.titulo}")` : ''} dejará de existir.\n\n${movsToMove.length} movimientos y ${rsvToMove.length} reservas se reasignarán a la OT ${target.numero}${target.titulo ? ` ("${target.titulo}")` : ''}.\n\nEsta acción no se puede deshacer.`,
+    'Sí, fusionar', true
+  );
+  if(!ok) return;
+  // Reasignar
+  movsToMove.forEach(mv => { mv.ot = target.numero; });
+  rsvToMove.forEach(r => { r.ot = target.numero; });
+  // Eliminar la OT source del catálogo
+  state.ots = state.ots.filter(o => o.id !== _otmMergeSourceId);
+  saveState();
+  poblarOtDatalist();
+  closeMergeModal();
+  renderOtModalTable();
+  // Refrescar análisis OT si está visible
+  try{ if(typeof renderOtAnalysis === 'function' && document.getElementById('view-otanalysis').classList.contains('active')) renderOtAnalysis(); }catch(e){}
+  try{ if(typeof renderHistorial === 'function' && document.getElementById('view-historial').classList.contains('active')) renderHistorial(); }catch(e){}
+  // Sync events
+  try{ if(typeof syncPushEvent === 'function'){
+    syncPushEvent(buildOtEvent('ot_merged', { id: source.id, numero: source.numero, titulo: source.titulo, mergedInto: target.numero }));
+    syncPushEvent(buildOtEvent('ot_updated', target));
+  }}catch(e){}
+  toast(`Fusión exitosa: ${movsToMove.length} movimientos + ${rsvToMove.length} reservas reasignados a OT ${target.numero}.`, 'ok', 5500);
+}
+
+// ELIMINAR una OT (solo si no tiene movimientos ni reservas asociadas)
+async function deleteOt(id){
+  const ot = (state.ots || []).find(o => o.id === id);
+  if(!ot) return;
+  const hasMovs = (state.movements || []).some(mv => normalizeOtInput(mv.ot) === ot.numero);
+  const hasRsv  = (state.reservations || []).some(r => normalizeOtInput(r.ot) === ot.numero);
+  if(hasMovs || hasRsv){
+    toast(`No se puede eliminar OT ${ot.numero}: tiene movimientos o reservas. Fusiónala con otra OT desde Editar.`, 'err', 5500);
+    return;
+  }
+  const ok = await confirmDialog(
+    `¿Eliminar OT ${ot.numero}?`,
+    `Esta OT no tiene movimientos ni reservas, así que es seguro eliminarla.${ot.titulo ? `\n\nTítulo: ${ot.titulo}` : ''}`,
+    'Eliminar', true
+  );
+  if(!ok) return;
+  state.ots = state.ots.filter(o => o.id !== id);
+  saveState();
+  poblarOtDatalist();
+  renderOtModalTable();
+  try{ if(typeof syncPushEvent === 'function') syncPushEvent(buildOtEvent('ot_deleted', ot)); }catch(e){}
+  toast(`OT ${ot.numero} eliminada.`, 'ok');
+}
+
+// EXPORTAR catálogo de OTs a Excel
+function exportOtsExcel(){
+  if(typeof XLSX === 'undefined'){ toast('Librería Excel no disponible', 'err'); return; }
+  const ots = state.ots || [];
+  const movCount = new Map();
+  const rsvCount = new Map();
+  (state.movements || []).forEach(mv => {
+    const n = normalizeOtInput(mv.ot);
+    if(n) movCount.set(n, (movCount.get(n) || 0) + 1);
+  });
+  (state.reservations || []).forEach(r => {
+    const n = normalizeOtInput(r.ot);
+    if(n) rsvCount.set(n, (rsvCount.get(n) || 0) + 1);
+  });
+  const rows = ots.map(ot => ({
+    'N° OT': ot.numero,
+    'Título': ot.titulo || '',
+    'Movimientos': movCount.get(ot.numero) || 0,
+    'Reservas': rsvCount.get(ot.numero) || 0,
+    'Creada': ot.createdAt ? ot.createdAt.slice(0, 10) : '',
+    'Creada por': ot.createdBy || '',
+    'Auto-creada': ot.isAutoCreated ? 'Sí' : 'No',
+  }));
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'OTs');
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Catalogo_OTs_SINFRA_${today}.xlsx`);
+  toast(`Excel descargado con ${rows.length} OTs.`, 'ok');
+}
+
+// EVENTO de sync para OTs
+function buildOtEvent(type, ot){
+  return {
+    EventId: 'ev-ot-' + (ot.id || 'x') + '-' + Date.now(),
+    DeviceId: (state.sync && state.sync.deviceId) || '',
+    Type: type, // ot_created | ot_updated | ot_deleted | ot_merged
+    OtId: ot.id,
+    Numero: ot.numero,
+    Titulo: ot.titulo || '',
+    MergedInto: ot.mergedInto || '',
+    CreatedAt: ot.createdAt,
+    CreatedBy: ot.createdBy || '',
+    IsAutoCreated: !!ot.isAutoCreated,
+    TimestampCliente: new Date().toISOString(),
+  };
+}
+
+// Helper para que el Análisis OT pueda llamar a abrir el modal con una OT específica
+function openOtModalForKey(key){
+  openOtModal(key);
+}
+
+window.openOtModal = openOtModal;
+window.closeOtModal = closeOtModal;
+window.openOtModalForKey = openOtModalForKey;
+window.otmStartEdit = otmStartEdit;
+window.otmCancelEdit = otmCancelEdit;
+window.otmFilterByErrors = otmFilterByErrors;
+window.openMergeModal = openMergeModal;
+window.closeMergeModal = closeMergeModal;
+window.selectMergeTarget = selectMergeTarget;
+window.otmConfirmMerge = otmConfirmMerge;
+window.syncOtsFromMovements = syncOtsFromMovements;
+window.deleteOt = deleteOt;
+window.exportOtsExcel = exportOtsExcel;
+window.ensureOtExists = ensureOtExists;
+window.normalizeOtInput = normalizeOtInput;
+window.poblarOtDatalist = poblarOtDatalist;
+window.buildOtEvent = buildOtEvent;
 
 init();
 
