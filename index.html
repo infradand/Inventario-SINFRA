@@ -2447,6 +2447,9 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
       <div class="ch-h" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span>Uso de materiales · qué necesitamos más</span>
         <span style="font-weight:400;font-size:11px;color:var(--muted);flex:1" id="chart-usage-range"></span>
+        <span class="freq-toggle" style="display:inline-flex;gap:0;border:1px solid #CBD5E1;border-radius:6px;overflow:hidden;font-size:11px">
+          <button type="button" id="dashboard-critical-toggle" style="padding:5px 12px;border:none;cursor:pointer" onclick="toggleDashboardCriticalOnly()">Ver críticos</button>
+        </span>
         <button type="button" class="btn btn-secondary btn-sm" onclick="exportDashboardExcel()" title="Descargar este análisis a Excel">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Excel
@@ -2466,6 +2469,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
       <div class="ch-h" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span id="freq-card-title">Top materiales más consumidos</span>
         <span style="font-weight:400;font-size:11px;color:var(--muted);flex:1" id="freq-range"></span>
+        <span style="font-weight:400;font-size:11px;color:var(--muted)">El filtro de críticos se controla desde el botón superior.</span>
       </div>
       <div class="ch-sub" id="freq-card-sub">Ranking por <b>cantidad total de unidades entregadas</b> (suma de salidas). Identifica los materiales que más se consumen, para anticipar reposiciones y priorizar disponibilidad.</div>
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 6px">
@@ -2510,127 +2514,81 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 
 <!-- ============== PRONÓSTICO ============== -->
 <section class="view" id="view-forecast">
-  <h2 class="view-title">Consumo mensual por material</h2>
+  <h2 class="view-title">Pronóstico · materiales críticos usados</h2>
   <p class="view-sub">
-    Mira cuánto material consumiste cada mes. Los datos vienen <b>directo del historial real</b>: misma fecha, misma cantidad y misma unidad que registraste en cada salida. Si una salida no está en el historial, no aparece aquí.
+    Esta vista <b>no recalcula el Dashboard</b>: toma la misma lógica que ya funciona para salidas reales por <b>matId</b>, filtrada a materiales críticos, y solo la muestra como gráfico + detalle.
   </p>
 
-  <!-- Barra simple de parámetros -->
   <div class="card fc-simple-bar">
     <div class="fc-simple-grid">
       <div class="field">
-        <label>Meses a analizar</label>
-        <select id="fc-window">
-          <option value="3">Últimos 3 meses</option>
-          <option value="6" selected>Últimos 6 meses</option>
-          <option value="12">Últimos 12 meses</option>
+        <label>Período</label>
+        <select id="fc-period">
+          <option value="day">Hoy</option>
+          <option value="week" selected>Semana</option>
+          <option value="month">Mes</option>
+          <option value="3m">3 meses</option>
+          <option value="all">Todo</option>
         </select>
-        <span class="field-hint">Período histórico para ver el consumo</span>
+        <span class="field-hint">Mismo criterio de período usado por el Dashboard.</span>
       </div>
       <div class="field">
-        <label>Mostrar</label>
-        <div style="display:flex;gap:14px;flex-wrap:wrap;padding:7px 0">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
-            <input type="checkbox" id="fc-critical-only" checked style="width:16px;height:16px;cursor:pointer">
-            Solo materiales críticos
-          </label>
-        </div>
-        <select id="fc-clasif">
-          <option value="">Todas las clasificaciones</option>
+        <label>Vista</label>
+        <select id="fc-sort">
+          <option value="qty" selected>Cantidad total usada</option>
+          <option value="count">Frecuencia de salidas</option>
         </select>
+        <span class="field-hint">Ordena el Top 10 sin cambiar el cálculo base.</span>
       </div>
       <div class="field" style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" type="button" onclick="renderForecast()">Recalcular</button>
-        <button class="btn btn-sm" type="button" onclick="exportForecast()">⬇ Exportar Excel</button>
+        <button class="btn btn-primary" type="button" onclick="renderForecast()">Actualizar</button>
+        <button class="btn btn-ghost" type="button" onclick="fcClearDetail()">Limpiar detalle</button>
       </div>
     </div>
-    <!-- Ocultos: mantenemos compatibilidad interna -->
-    <input type="hidden" id="fc-service-level" value="0.95">
-    <input type="hidden" id="fc-with-movement" value="1">
   </div>
 
-  <!-- KPIs simples -->
   <div class="kpis fc-kpis">
-    <div class="kpi red"  style="cursor:pointer" onclick="fcFilterByStatus('critico')">
-      <div class="kpi-label">⚠ En alerta</div>
-      <div class="kpi-value" id="fc-kpi-critical">0</div>
-      <div class="kpi-sub">materiales con stock muy bajo o agotado</div>
-    </div>
-    <div class="kpi" style="background:#FFF6E0;border-color:#FCD34D;cursor:pointer" onclick="fcFilterByStatus('reordenar')">
-      <div class="kpi-label" style="color:#92400E">↻ Por reordenar</div>
-      <div class="kpi-value" id="fc-kpi-reorder" style="color:#92400E">0</div>
-      <div class="kpi-sub" style="color:#92400E">conviene pedir pronto</div>
-    </div>
-    <div class="kpi" style="background:#FEF2F2;border-color:#FCA5A5">
-      <div class="kpi-label" style="color:#991B1B">↗ Subiendo de consumo</div>
-      <div class="kpi-value" id="fc-kpi-trend" style="color:#991B1B">0</div>
-      <div class="kpi-sub" style="color:#991B1B">están consumiendo más que antes</div>
-    </div>
-    <div class="kpi" style="background:#ECFDF5;border-color:#6EE7B7">
-      <div class="kpi-label" style="color:#065F46">↘ Bajando de consumo</div>
-      <div class="kpi-value" id="fc-kpi-trend-down" style="color:#065F46">0</div>
-      <div class="kpi-sub" style="color:#065F46">consumen menos que antes</div>
-    </div>
+    <div class="kpi red"><div class="kpi-label">Críticos usados</div><div class="kpi-value" id="fc-kpi-materials">0</div><div class="kpi-sub">materiales distintos</div></div>
+    <div class="kpi teal"><div class="kpi-label">Consumo total</div><div class="kpi-value" id="fc-kpi-consumo">0</div><div class="kpi-sub">unidades usadas</div></div>
+    <div class="kpi yellow"><div class="kpi-label">Por reordenar / alerta</div><div class="kpi-value" id="fc-kpi-riesgo">0</div><div class="kpi-sub">dentro del Top 10</div></div>
+    <div class="kpi"><div class="kpi-label">Tendencia subiendo</div><div class="kpi-value" id="fc-kpi-up">0</div><div class="kpi-sub">comparado con período anterior</div></div>
   </div>
 
-  <!-- Gráfico HERO: Top 10 críticos con barras + tendencia -->
   <div class="card fc-hero-card">
     <div class="card-h" style="flex-wrap:wrap;gap:10px">
-      <span>Top 10 materiales por consumo · tendencia mensual</span>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <label style="font-size:12px;color:var(--muted);font-weight:500">Vista:</label>
-        <select id="fc-hero-mode" style="padding:5px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;background:#fff;cursor:pointer">
-          <option value="">Período completo</option>
-        </select>
-        <span style="font-size:12px;color:var(--muted);font-weight:400" id="fc-hero-sub">—</span>
-      </div>
+      <span>Top 10 materiales críticos usados</span>
+      <span style="font-size:12px;color:var(--muted);font-weight:400" id="fc-hero-sub">—</span>
     </div>
-    <div style="padding:0 14px 4px;font-size:12px;color:var(--muted);line-height:1.5" id="fc-hero-help">
-      <b style="color:var(--ink-2)">¿Cómo se lee?</b> Cada barra es un <b>material</b> y muestra el total consumido en el período (datos reales del historial, sumados por nombre de material). La línea naranja es la <b>tendencia</b>: compara la 2ª mitad vs la 1ª mitad del período. <b style="color:var(--red)">+30%</b> = se consume 30% MÁS que antes; <b style="color:var(--green)">−20%</b> = 20% MENOS.
+    <div style="padding:0 14px 4px;font-size:12px;color:var(--muted);line-height:1.5">
+      <b style="color:var(--ink-2)">Leyenda:</b> verde/teal = Stock OK · amarillo = Por reordenar · rojo = En alerta / sin stock · flecha = tendencia subiendo o bajando. <b>Click en una barra</b> para ver el detalle día a día.
     </div>
     <div id="fc-hero-chart" class="fc-hero-chart"></div>
     <div id="fc-hero-legend" class="fc-hero-legend"></div>
   </div>
 
-  <!-- Tarjetas individuales por material -->
-  <div class="card">
-    <div class="card-h">
-      <span>Top 10 materiales por consumo · detalle mensual</span>
-      <span style="font-size:12px;color:var(--muted);font-weight:400" id="fc-cards-sub">—</span>
+  <div class="card" id="fc-detail-card" style="display:none">
+    <div class="card-h" style="flex-wrap:wrap;gap:10px">
+      <span id="fc-detail-title">Detalle del material</span>
+      <span style="font-size:12px;color:var(--muted);font-weight:400" id="fc-detail-sub">—</span>
     </div>
-    <div id="fc-cards-grid" class="fc-cards-grid"></div>
+    <div id="fc-detail-content"></div>
   </div>
 
-  <!-- Tabla resumen, simple -->
   <div class="card">
     <div class="card-h">
-      <span>Todos los materiales · resumen</span>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="text" id="fc-tbl-search" placeholder="Buscar material..." style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px">
-        <select id="fc-tbl-status" style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px">
-          <option value="">Todos los estados</option>
-          <option value="sin_stock">Sin stock</option>
-          <option value="critico">En alerta</option>
-          <option value="reordenar">Por reordenar</option>
-          <option value="ok">OK</option>
-          <option value="exceso">Exceso</option>
-          <option value="sin_movimiento">Sin consumo</option>
-        </select>
-        <span class="count" id="fc-tbl-count">0 / 0</span>
-      </div>
+      <span>Resumen Top 10</span>
     </div>
     <div class="table-wrap">
       <table class="t fc-tbl" id="fc-tbl">
         <thead><tr>
+          <th>#</th>
           <th>Material</th>
-          <th>Clasif.</th>
-          <th class="num">Disponible</th>
-          <th class="num">Consumo/mes</th>
-          <th class="num">Tendencia</th>
-          <th class="num">Total período</th>
-          <th class="num">Cobertura</th>
+          <th class="num">Cant. total</th>
+          <th class="num">Salidas</th>
+          <th class="num">Stock</th>
           <th>Estado</th>
-          <th>Hist.</th>
+          <th>Tendencia</th>
+          <th>Última salida</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -7483,17 +7441,61 @@ function stockPillClass(stock, critico){
   return 'ok';
 }
 
+
+// Dashboard critical-only toggle shared by both material-use sections
+let dashboardCriticalOnly = false;
+
+function isCriticalMaterial(mat){
+  if(!mat) return false;
+  const c = String(mat.critico || '').trim().toLowerCase();
+  return !!c && c !== 'ok' && c !== 'normal' && c !== 'no' && c !== 'false';
+}
+
+function isCriticalMatId(matId){
+  const mat = state.materials.find(x => String(x.id) === String(matId));
+  return isCriticalMaterial(mat);
+}
+
+function criticalOnlyMap(srcMap){
+  const out = new Map();
+  srcMap.forEach((value, matId)=>{
+    if(isCriticalMatId(matId)) out.set(matId, value);
+  });
+  return out;
+}
+
+function updateCriticalToggleButton(id, active){
+  const btn = document.getElementById(id);
+  if(!btn) return;
+  btn.classList.toggle('active', !!active);
+  btn.textContent = active ? 'Ver todos' : 'Ver críticos';
+  btn.title = active ? 'Volver a mostrar todos los materiales' : 'Mostrar solo materiales catalogados como críticos';
+}
+
+function toggleDashboardCriticalOnly(){
+  dashboardCriticalOnly = !dashboardCriticalOnly;
+  renderDashboard();
+}
+
+/* Compatibilidad por si queda algún onclick antiguo guardado en caché */
+function toggleUsageCriticalOnly(){ toggleDashboardCriticalOnly(); }
+function toggleFreqCriticalOnly(){ toggleDashboardCriticalOnly(); }
+
 function renderUsageTrend(periodMovs, range){
   const donutBox = document.getElementById('chart-usage-donut');
   const legendBox= document.getElementById('chart-usage-legend');
   const summary  = document.getElementById('chart-usage-summary');
   const N = 8; // top materials shown as separate slices; rest become "Otros"
 
-  const currMap = sumSalidasByMat(periodMovs);
+  updateCriticalToggleButton('dashboard-critical-toggle', dashboardCriticalOnly);
+  let currMap = sumSalidasByMat(periodMovs);
+  if(dashboardCriticalOnly) currMap = criticalOnlyMap(currMap);
   if(currMap.size === 0){
     summary.innerHTML = '';
     legendBox.innerHTML = '';
-    donutBox.innerHTML = '<div class="chart-empty">Sin salidas registradas en el período. Cuando entreguen materiales a las actividades aparecerá aquí el reparto del consumo.</div>';
+    donutBox.innerHTML = `<div class="chart-empty">${dashboardCriticalOnly
+      ? 'Sin salidas de materiales críticos en el período. Cambia a "Ver todos" o amplía el período.'
+      : 'Sin salidas registradas en el período. Cuando entreguen materiales a las actividades aparecerá aquí el reparto del consumo.'}</div>`;
     return;
   }
 
@@ -7502,7 +7504,8 @@ function renderUsageTrend(periodMovs, range){
   const prevMovs = (prevRange.from)
     ? state.movements.filter(m=> m.date >= prevRange.from && m.date <= prevRange.to && !m._adjustment)
     : [];
-  const prevMap = sumSalidasByMat(prevMovs);
+  let prevMap = sumSalidasByMat(prevMovs);
+  if(dashboardCriticalOnly) prevMap = criticalOnlyMap(prevMap);
 
   // Top N materials by salidas; everything else collapses into "Otros"
   const sortedAll = [...currMap.entries()].sort((a,b)=>b[1]-a[1]);
@@ -7531,7 +7534,7 @@ function renderUsageTrend(periodMovs, range){
 
   let summaryHtml = '<div class="usage-summary">';
   summaryHtml += `<div class="box"><small>Consumo total (${periodTxt})</small><b>${totalCurr.toLocaleString('es-CL')}</b><span class="delta ${deltaInfo.dir}">${deltaInfo.dir==='new'?'Sin datos previos':(deltaInfo.dir==='flat'?'Estable':deltaInfo.label)} vs. ${prevPeriodTxt}</span></div>`;
-  summaryHtml += `<div class="box teal"><small>Materiales movidos</small><b>${currMap.size}</b><span class="delta flat">${topMats.length} en el top + ${otrosCount} en "Otros"</span></div>`;
+  summaryHtml += `<div class="box teal"><small>${dashboardCriticalOnly ? 'Materiales críticos movidos' : 'Materiales movidos'}</small><b>${currMap.size}</b><span class="delta flat">${topMats.length} en el top + ${otrosCount} en "Otros"</span></div>`;
   if(newMats>0)   summaryHtml += `<div class="box teal"><small>Materiales nuevos en uso</small><b>${newMats}</b><span class="delta">Sin consumo el período anterior</span></div>`;
   if(critNeeds>0) summaryHtml += `<div class="box red"><small>Necesidad crítica</small><b>${critNeeds}</b><span class="delta up">Sin stock pero con consumo</span></div>`;
   summaryHtml += '</div>';
@@ -7601,6 +7604,8 @@ function renderFrequencyAnalysis(periodMovs, range){
   const subEl   = document.getElementById('freq-card-sub');
   if(!wrap || !summary) return;
 
+  updateCriticalToggleButton('dashboard-critical-toggle', dashboardCriticalOnly);
+
   // Update card title and description based on sort mode
   if(titleEl && subEl){
     if(freqSortBy === 'qty'){
@@ -7613,25 +7618,26 @@ function renderFrequencyAnalysis(periodMovs, range){
   }
 
   const useAll = freqMode === 'all';
-  const movs = useAll
+  let movs = useAll
     ? state.movements.filter(m => m.type === 'salida' && !m._adjustment)
     : periodMovs.filter(m => m.type === 'salida' && !m._adjustment);
+  if(dashboardCriticalOnly) movs = movs.filter(m => isCriticalMatId(m.matId));
 
   if(rangeEl){
     if(useAll){
-      rangeEl.textContent = `Histórico: ${movs.length.toLocaleString('es-CL')} salidas registradas`;
+      rangeEl.textContent = `${dashboardCriticalOnly ? 'Críticos · ' : ''}Histórico: ${movs.length.toLocaleString('es-CL')} salidas registradas`;
     } else {
       rangeEl.textContent = range.from
-        ? `${fmtDate(range.from)} — ${fmtDate(range.to)}`
+        ? `${dashboardCriticalOnly ? 'Críticos · ' : ''}${fmtDate(range.from)} — ${fmtDate(range.to)}`
         : '';
     }
   }
 
   if(!movs.length){
     summary.innerHTML = '';
-    wrap.innerHTML = `<div class="freq-empty">${useAll
-      ? 'Aún no hay salidas registradas. Cuando se entreguen materiales aparecerá aquí el ranking de frecuencia.'
-      : 'Sin salidas en el período. Cambia a "Histórico total" o amplía el período.'}</div>`;
+    wrap.innerHTML = `<div class="freq-empty">${dashboardCriticalOnly
+      ? (useAll ? 'Aún no hay salidas históricas de materiales críticos.' : 'Sin salidas de materiales críticos en el período. Cambia a "Ver todos", usa "Histórico total" o amplía el período.')
+      : (useAll ? 'Aún no hay salidas registradas. Cuando se entreguen materiales aparecerá aquí el ranking de frecuencia.' : 'Sin salidas en el período. Cambia a "Histórico total" o amplía el período.')}</div>`;
     return;
   }
 
@@ -7682,11 +7688,11 @@ function renderFrequencyAnalysis(periodMovs, range){
   let summaryHtml = '<div class="usage-summary">';
   if(sortByQty){
     summaryHtml += `<div class="box teal"><small>Cantidad total entregada (${periodTxt})</small><b>${fmtQ(totalQty)}</b><span class="delta flat">unidades en ${totalSalidas.toLocaleString('es-CL')} salidas</span></div>`;
-    summaryHtml += `<div class="box"><small>Materiales con consumo</small><b>${matsActivos.toLocaleString('es-CL')}</b><span class="delta flat">distintos en el período</span></div>`;
+    summaryHtml += `<div class="box"><small>${dashboardCriticalOnly ? 'Críticos con consumo' : 'Materiales con consumo'}</small><b>${matsActivos.toLocaleString('es-CL')}</b><span class="delta flat">distintos en el período</span></div>`;
     summaryHtml += `<div class="box green"><small>Concentración top 3</small><b>${top3Pct}%</b><span class="delta flat">de la cantidad total</span></div>`;
   } else {
     summaryHtml += `<div class="box teal"><small>Salidas totales (${periodTxt})</small><b>${totalSalidas.toLocaleString('es-CL')}</b><span class="delta flat">${fmtQ(totalQty)} unidades movidas</span></div>`;
-    summaryHtml += `<div class="box"><small>Materiales con consumo</small><b>${matsActivos.toLocaleString('es-CL')}</b><span class="delta flat">distintos en el período</span></div>`;
+    summaryHtml += `<div class="box"><small>${dashboardCriticalOnly ? 'Críticos con consumo' : 'Materiales con consumo'}</small><b>${matsActivos.toLocaleString('es-CL')}</b><span class="delta flat">distintos en el período</span></div>`;
     summaryHtml += `<div class="box green"><small>Concentración top 3</small><b>${top3Pct}%</b><span class="delta flat">de los movimientos</span></div>`;
   }
   // Critical materials in top
@@ -8053,7 +8059,7 @@ function renderDashboard(){
 
   // USAGE WITH TREND (replaces Movimientos chart + Top 10 card)
   document.getElementById('chart-usage-range').textContent = range.from
-    ? `${fmtDate(range.from)} — ${fmtDate(range.to)}`
+    ? `${dashboardCriticalOnly ? 'Críticos · ' : ''}${fmtDate(range.from)} — ${fmtDate(range.to)}`
     : '';
   renderUsageTrend(periodMovs, range);
 
@@ -12009,907 +12015,301 @@ window.resetNuevoMat = resetNuevoMat;
 window.setPeriod = setPeriod;
 
 // ===============================================================
-//  PRONÓSTICO DE CONSUMO (versión simplificada, mensual)
-//  Calcula consumo por mes basado en el historial de movimientos
-//  time. Visualizaciones enfocadas en comportamiento (barras + línea
-//  de tendencia), sin terminología técnica en la UI.
+//  PRONÓSTICO · TOP 10 MATERIALES CRÍTICOS USADOS
+//  IMPORTANTE: no toca el cálculo del Dashboard.
+//  Reutiliza las mismas funciones confiables:
+//  - filterMovsByPeriod(period)
+//  - isCriticalMatId(matId)
+//  - trendInfo(curr, prev)
+//  - totalStockOf(mat)
 // ===============================================================
-let _fcLastResults = [];          // cache de la última corrida (para export/filtros)
-let _fcLastTopAll = [];           // top 10 críticos por consumo (para hero + cards)
-let _fcTblStatusFilter = '';      // filtro de estado activo en la tabla
+let _fcLastRows = [];
+let _fcSelectedMatId = null;
 let _fcInitialized = false;
 
-function fcCfg(){
-  return {
-    months:       Math.max(2, parseInt(document.getElementById('fc-window')?.value || '6')),
-    criticalOnly: document.getElementById('fc-critical-only')?.checked !== false,
-    clasif:       document.getElementById('fc-clasif')?.value || ''
-  };
-}
-
-// Devuelve los últimos N meses (cada uno con etiqueta corta y rango from/to)
-function fcBuildMonths(n){
-  const today = new Date(todayStr() + 'T00:00:00');
-  const months = [];
-  for(let i = n - 1; i >= 0; i--){
-    const ref = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const next = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
-    const last = new Date(next.getTime() - 86400000); // último día del mes
-    months.push({
-      label: ref.toLocaleDateString('es-CL', {month: 'short'}).replace('.','') + ' ' + String(ref.getFullYear()).slice(2),
-      from: ref.toISOString().slice(0,10),
-      to: last.toISOString().slice(0,10),
-      qty: 0
-    });
+function initForecastView(){
+  if(_fcInitialized) return;
+  _fcInitialized = true;
+  const p = document.getElementById('fc-period');
+  if(p){
+    p.value = dashPeriod || 'week';
+    p.addEventListener('change', renderForecast);
   }
-  return months;
+  const s = document.getElementById('fc-sort');
+  if(s) s.addEventListener('change', renderForecast);
 }
 
-// Regresión lineal simple → {slope, intercept}
-function fcLinearRegression(values){
-  const n = values.length;
-  if(n < 2) return {slope:0, intercept: values[0]||0};
-  let sx=0, sy=0, sxy=0, sxx=0;
-  values.forEach((y,i) => { sx+=i; sy+=y; sxy+=i*y; sxx+=i*i; });
-  const denom = (n*sxx - sx*sx);
-  const slope = denom === 0 ? 0 : (n*sxy - sx*sy) / denom;
-  const intercept = (sy - slope*sx) / n;
-  return {slope, intercept};
+function fcGetPeriod(){
+  return document.getElementById('fc-period')?.value || dashPeriod || 'week';
 }
 
-function computeMaterialForecast(mat, cfg, opts){
-  opts = opts || {};
-  // aliasIds: lista de matIds que comparten el MISMO nombre de material en el
-  // catálogo (duplicados). Si hay duplicados, sumamos stock y movimientos de todos.
-  const aliasIds = opts.aliasIds || [mat.id];
-  const matNameKey = (mat.material || '').trim().toLowerCase();
+function fcGetPrevMovs(period){
+  const r = getPrevPeriodRange(period);
+  if(!r.from) return [];
+  return (state.movements || []).filter(m => {
+    if(m._adjustment) return false;
+    const regDate = m.timestamp ? m.timestamp.slice(0,10) : (m.date || '');
+    return regDate >= r.from && regDate <= r.to;
+  });
+}
 
-  // Construir buckets mensuales y rellenar con los consumos reales
-  const months = fcBuildMonths(cfg.months);
-  const fromAll = months[0].from;
-  (state.movements || []).forEach(m => {
-    // Match flexible: por matId (incluyendo aliases) O por nombre normalizado.
-    // Esto garantiza que TODOS los movimientos que aparecen en el historial con
-    // este nombre se sumen aquí, incluso si quedaron registrados con un matId
-    // diferente (por ej., duplicados de catálogo).
-    const byId   = aliasIds.includes(m.matId);
-    const movKey = (m.material || '').trim().toLowerCase();
-    const byName = matNameKey && movKey === matNameKey;
-    if(!byId && !byName) return;
-    if(m.type !== 'salida') return;
-    if(m._adjustment || m.isTransfer) return;
-    const day = m.date || (m.timestamp ? m.timestamp.slice(0,10) : null);
-    if(!day || day < fromAll) return;
-    const bucket = months.find(mo => day >= mo.from && day <= mo.to);
-    if(bucket) bucket.qty += (m.qty || 0);
+function fcStockState(mat, avgPerMove){
+  const stock = totalStockOf(mat);
+  const c = String(mat?.critico || '').toLowerCase();
+  if(stock <= 0 || c.includes('sin stock')) return {key:'sin_stock', label:'En alerta / sin stock', cls:'critico', color:'#C13832'};
+  if(c !== 'ok' && c !== '' && (c.includes('bajo') || c.includes('reorden') || c.includes('alerta') || c.includes('crit'))) return {key:'reordenar', label:'Por reordenar', cls:'reordenar', color:'#F4AA00'};
+  if(avgPerMove && stock < avgPerMove) return {key:'reordenar', label:'Por reordenar', cls:'reordenar', color:'#F4AA00'};
+  return {key:'ok', label:'Stock OK', cls:'ok', color:'#0098AA'};
+}
+
+function fcBuildRows(){
+  const period = fcGetPeriod();
+  const sortBy = document.getElementById('fc-sort')?.value || 'qty';
+  const currMovs = filterMovsByPeriod(period)
+    .filter(m => m.type === 'salida' && !m._adjustment && isCriticalMatId(m.matId));
+  const prevMovs = fcGetPrevMovs(period)
+    .filter(m => m.type === 'salida' && !m._adjustment && isCriticalMatId(m.matId));
+
+  const curr = new Map();
+  currMovs.forEach(mv => {
+    if(!mv.matId) return;
+    const mat = state.materials.find(x => String(x.id) === String(mv.matId));
+    if(!mat) return;
+    if(!curr.has(mv.matId)){
+      curr.set(mv.matId, {
+        matId: mv.matId,
+        material: mv.material || mat.material || '(sin nombre)',
+        sap: mv.sap || mat.sap || '',
+        clasif: mv.clasif || mat.clasif || '',
+        critico: mat.critico || '',
+        qtyTotal: 0,
+        count: 0,
+        days: new Map(),
+        movements: [],
+        lastTs: ''
+      });
+    }
+    const r = curr.get(mv.matId);
+    const q = Number(mv.qty) || 0; // MISMO CAMPO QUE USA DASHBOARD: no se invierte signo ni se reinterpreta.
+    r.qtyTotal += q;
+    r.count += 1;
+    const day = mv.timestamp ? mv.timestamp.slice(0,10) : (mv.date || '');
+    if(day) r.days.set(day, (r.days.get(day) || 0) + q);
+    r.movements.push(mv);
+    if(mv.timestamp && mv.timestamp > r.lastTs) r.lastTs = mv.timestamp;
   });
 
-  const values = months.map(m => m.qty);
-  const totalConsumed = values.reduce((s,v) => s+v, 0);
-  const avgMonthly = totalConsumed / cfg.months;
-
-  // Tendencia: % cambio entre 2ª mitad y 1ª mitad de los meses
-  const half = Math.floor(cfg.months / 2);
-  const firstSum  = values.slice(0, half).reduce((s,v)=>s+v,0);
-  const secondSum = values.slice(half).reduce((s,v)=>s+v,0);
-  const firstAvg  = firstSum / Math.max(1, half);
-  const secondAvg = secondSum / Math.max(1, cfg.months - half);
-  let trendPct = 0;
-  if(firstAvg > 0)        trendPct = ((secondAvg - firstAvg) / firstAvg) * 100;
-  else if(secondAvg > 0)  trendPct = 100;
-
-  // Regresión lineal para la línea de tendencia (sobre los meses)
-  const reg = fcLinearRegression(values);
-
-  // Stock actual disponible: SUMA de stock de TODOS los duplicados (alias)
-  let totalStock = 0, reserved = 0;
-  aliasIds.forEach(id => {
-    const inst = (state.materials || []).find(x => x.id === id);
-    if(!inst) return;
-    AREA_KEYS.forEach(k => { totalStock += (inst.stock[k] || 0); });
-    reserved += getReservedTotalForMat(id);
+  const prev = new Map();
+  prevMovs.forEach(mv => {
+    if(!mv.matId) return;
+    prev.set(mv.matId, (prev.get(mv.matId) || 0) + (Number(mv.qty) || 0));
   });
-  const available  = totalStock - reserved;
-  const monthsCoverage = avgMonthly > 0 ? available / avgMonthly : null;
 
-  // Mes con más consumo (de los datos reales del historial)
-  let peakMonthIdx = -1, peakMonthQty = 0;
-  values.forEach((v, i) => { if(v > peakMonthQty){ peakMonthQty = v; peakMonthIdx = i; } });
-  const peakMonthLabel = peakMonthIdx >= 0 ? months[peakMonthIdx].label : '—';
+  let rows = [...curr.values()].map(r => {
+    const mat = state.materials.find(x => String(x.id) === String(r.matId));
+    const stock = mat ? totalStockOf(mat) : 0;
+    const avgPerMove = r.count ? r.qtyTotal / r.count : 0;
+    const status = fcStockState(mat, avgPerMove);
+    const tr = trendInfo(r.qtyTotal, prev.get(r.matId) || 0);
+    return {...r, stock, avgPerMove, status, trend: tr, prevQty: prev.get(r.matId) || 0};
+  });
 
-  // Consumo promedio mensual (referencia, basada en el historial real)
-  const avgMonthlyCeil = Math.ceil(avgMonthly);
-  // Si el stock no alcanza para un mes de consumo → ya estamos cortos
-  // Si no alcanza ni para medio mes → alerta
-  const halfMonthThreshold = avgMonthly * 0.5;
-
-  // Estado (basado únicamente en consumo real del historial y stock actual)
-  let status, recommendation;
-  const u = fcMatUnit(mat);
-  const toBuyForMonth = Math.max(0, avgMonthlyCeil - available);
-  if(avgMonthly === 0){
-    status = 'sin_movimiento';
-    recommendation = `Sin consumo registrado en los últimos ${cfg.months} meses según el historial. Revisa si el material sigue en uso.`;
-  } else if(available <= 0){
-    status = 'sin_stock';
-    recommendation = `Sin stock disponible. En el historial consumes en promedio ${avgMonthlyCeil} ${u} al mes.`;
-  } else if(available < halfMonthThreshold){
-    status = 'critico';
-    recommendation = `Stock bajo: alcanza para menos de medio mes al ritmo del historial. Para volver a cubrir un mes faltan ${toBuyForMonth} ${u}.`;
-  } else if(available < avgMonthly){
-    status = 'reordenar';
-    recommendation = `Por reordenar: el stock alcanza para menos de un mes al ritmo del historial. Para cubrir un mes completo faltan ${toBuyForMonth} ${u}.`;
-  } else if(monthsCoverage != null && monthsCoverage > 3){
-    status = 'exceso';
-    recommendation = `Stock sobra: alcanza para ${Math.round(monthsCoverage)} meses al ritmo de consumo del historial.`;
-  } else {
-    status = 'ok';
-    recommendation = `Stock OK. El historial muestra un consumo promedio de ${avgMonthlyCeil} ${u} al mes.`;
-  }
-
-  return {
-    matId: mat.id, material: mat.material, sap: mat.sap, clasif: mat.clasif, critico: mat.critico,
-    aliasIds, matNameKey,
-    duplicateCount: aliasIds.length,
-    unit: u,
-    totalStock, reserved, available,
-    totalConsumed, avgMonthly, trendPct,
-    avgMonthlyCeil, monthsCoverage,
-    peakMonthIdx, peakMonthQty, peakMonthLabel,
-    months, values, regression: reg,
-    status, recommendation, toBuyForMonth,
-    // Aliases para compatibilidad con código antiguo
-    monthlyStockRecommended: avgMonthlyCeil, reorderPoint: halfMonthThreshold, toBuyForRec: toBuyForMonth
-  };
+  rows.sort((a,b) => sortBy === 'count'
+    ? (b.count - a.count || b.qtyTotal - a.qtyTotal)
+    : (b.qtyTotal - a.qtyTotal || b.count - a.count));
+  return rows;
 }
 
-// Mini gráfico de barras mensual con gradientes (para cards y tabla)
-function fcMonthlyBars(months, values, opts){
-  opts = opts || {};
-  const w = opts.w || 120, h = opts.h || 32;
-  const pad = 2;
-  const n = values.length;
-  if(!n) return '';
-  const max = Math.max(1, ...values);
-  const barW = (w - 2*pad) / n;
-  const innerBarW = Math.max(1, barW - 1.5);
-  const color = opts.color || '#0098AA';
-  const bars = values.map((v, i) => {
-    if(v === 0) return '';
-    const x = pad + i*barW + 0.75;
-    const bh = (v/max) * (h - 2*pad);
-    const y = h - pad - bh;
-    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${innerBarW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${color}"/>`;
-  }).join('');
-  // Línea de tendencia (regresión)
-  let line = '';
-  if(n >= 2){
-    const reg = fcLinearRegression(values);
-    const y0 = h - pad - (Math.max(0, reg.intercept) / max) * (h - 2*pad);
-    const yN = h - pad - (Math.max(0, reg.slope*(n-1) + reg.intercept) / max) * (h - 2*pad);
-    const x0 = pad + 0.5*barW, xN = pad + (n-0.5)*barW;
-    line = `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${xN.toFixed(1)}" y2="${yN.toFixed(1)}" stroke="#E55302" stroke-width="1" stroke-dasharray="2 2"/>`;
-  }
-  // Etiquetas opcional
-  let labels = '';
-  if(opts.showLabels && months){
-    labels = months.map((m, i) => {
-      const x = pad + (i + 0.5) * barW;
-      return `<text x="${x.toFixed(1)}" y="${h - 1}" text-anchor="middle" font-size="9" fill="#94A3B8" style="text-transform:capitalize">${escHtml(m.label)}</text>`;
-    }).join('');
-  }
-  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="display:block;width:100%;height:100%">
-    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#E2E5EA" stroke-width="0.5"/>
-    ${bars}
-    ${line}
-    ${labels}
-  </svg>`;
+function renderForecast(){
+  const rows = fcBuildRows();
+  _fcLastRows = rows;
+  const top10 = rows.slice(0,10);
+  if(_fcSelectedMatId && !rows.some(r => String(r.matId) === String(_fcSelectedMatId))) _fcSelectedMatId = null;
+
+  const total = rows.reduce((s,r)=>s+r.qtyTotal,0);
+  const riesgosTop = top10.filter(r => r.status.key === 'sin_stock' || r.status.key === 'reordenar').length;
+  const ups = rows.filter(r => r.trend.dir === 'up' || r.trend.dir === 'new').length;
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('fc-kpi-materials', rows.length.toLocaleString('es-CL'));
+  set('fc-kpi-consumo', fmtQty(total));
+  set('fc-kpi-riesgo', riesgosTop.toLocaleString('es-CL'));
+  set('fc-kpi-up', ups.toLocaleString('es-CL'));
+
+  const range = getPeriodRange(fcGetPeriod());
+  const sub = document.getElementById('fc-hero-sub');
+  if(sub) sub.textContent = range.from ? `${fmtDate(range.from)} — ${fmtDate(range.to)} · ${top10.length} de ${rows.length} críticos con uso` : 'Sin período';
+
+  fcRenderTopChart(top10);
+  fcRenderTopTable(top10);
+  if(_fcSelectedMatId) fcRenderDetail(_fcSelectedMatId);
+  else fcClearDetail(false);
 }
+window.renderForecast = renderForecast;
 
-// Devuelve la unidad de medida del material (UN por default)
-function fcMatUnit(matOrId){
-  const mat = (typeof matOrId === 'number')
-    ? (state.materials||[]).find(m => m.id === matOrId)
-    : matOrId;
-  return (mat && mat.specs && mat.specs.unidad) ? mat.specs.unidad : 'UN';
-}
-
-// Aclara un color hex en un factor [0..1]
-function fcLighten(hex, amount){
-  hex = (hex || '#0098AA').replace('#','');
-  if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
-  const r = parseInt(hex.substr(0,2),16);
-  const g = parseInt(hex.substr(2,2),16);
-  const b = parseInt(hex.substr(4,2),16);
-  const lr = Math.min(255, Math.round(r + (255-r)*amount));
-  const lg = Math.min(255, Math.round(g + (255-g)*amount));
-  const lb = Math.min(255, Math.round(b + (255-b)*amount));
-  return '#' + [lr,lg,lb].map(v => v.toString(16).padStart(2,'0')).join('');
-}
-
-// === Gráfico HERO: Top 10 MATERIALES con dos vistas (período / mes específico) ===
-let _fcHeroMode = '';   // '' = período completo · 'N' (índice de mes) = vista de ese mes
-
-function fcRenderHero(top10){
+function fcRenderTopChart(rows){
   const el = document.getElementById('fc-hero-chart');
   const legend = document.getElementById('fc-hero-legend');
-  const sel = document.getElementById('fc-hero-mode');
-  const helpEl = document.getElementById('fc-hero-help');
   if(!el) return;
-
-  // Sólo materiales con consumo > 0, ya vienen ordenados por totalConsumed
-  const items = (top10 || []).filter(r => r && r.totalConsumed > 0).slice(0, 10);
-
-  if(!items.length){
-    el.innerHTML = '<div class="fc-empty">Sin materiales con consumo en el período seleccionado.</div>';
+  if(!rows.length){
+    el.innerHTML = '<div class="fc-empty">Sin salidas de materiales críticos en este período.</div>';
     if(legend) legend.innerHTML = '';
-    if(sel) sel.innerHTML = '<option value="">Período completo</option>';
     return;
   }
-
-  // Poblar selector de meses
-  if(sel){
-    const months = items[0].months || [];
-    const prev = _fcHeroMode;
-    sel.innerHTML = '<option value="">Período completo</option>' +
-      months.map((mo, i) => `<option value="${i}">📅 ${escHtml(mo.label).replace(/^./, c=>c.toUpperCase())}</option>`).join('');
-    if(prev !== '' && parseInt(prev) < months.length){ sel.value = prev; } else { sel.value = ''; _fcHeroMode = ''; }
-    if(!sel.dataset.wired){
-      sel.dataset.wired = '1';
-      sel.addEventListener('change', () => { _fcHeroMode = sel.value; fcRenderHero(_fcLastTopAll); });
-    }
+  const W=900, H=430, padL=64, padR=24, padT=28, padB=145;
+  const innerW=W-padL-padR, innerH=H-padT-padB;
+  const max=Math.max(1,...rows.map(r=>r.qtyTotal));
+  const slot=innerW/rows.length, barW=Math.min(56, slot*.62);
+  const y=q=>padT+innerH-(q/max)*innerH;
+  let grid='';
+  for(let i=0;i<=4;i++){
+    const yy=padT+innerH*i/4;
+    const val=max*(1-i/4);
+    grid+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#EEF2F7" stroke-width="1"${i===4?'':' stroke-dasharray="3 4"'}/>`;
+    grid+=`<text x="${padL-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="#94A3B8">${Math.round(val).toLocaleString('es-CL')}</text>`;
   }
-
-  const isMonthView = _fcHeroMode !== '' && !isNaN(parseInt(_fcHeroMode));
-  const monthIdx    = isMonthView ? parseInt(_fcHeroMode) : -1;
-  const monthLabel  = isMonthView ? items[0].months[monthIdx].label : '';
-
-  // Valores para el modo actual
-  const display = items.map(r => {
-    if(isMonthView){
-      const v = r.values[monthIdx] || 0;
-      const monthAvg = r.totalConsumed / r.values.length;
-      const vsAvg = monthAvg > 0 ? ((v - monthAvg) / monthAvg) * 100 : (v > 0 ? 100 : 0);
-      return {r, value: v, trend: vsAvg};
-    } else {
-      return {r, value: r.totalConsumed, trend: r.trendPct};
-    }
-  });
-  if(isMonthView) display.sort((a,b) => b.value - a.value);
-
-  if(helpEl){
-    helpEl.innerHTML = isMonthView
-      ? `<b style="color:var(--ink-2)">Vista del mes <span style="text-transform:capitalize">${escHtml(monthLabel)}</span>:</b> cada barra es un <b>material</b> con el total consumido <b>en ese mes</b>, según el historial. La línea naranja indica el <b>% vs el promedio mensual</b> del propio material.`
-      : `<b style="color:var(--ink-2)">¿Cómo se lee?</b> Cada barra es un <b>material</b> y muestra el total consumido en el período (datos reales del historial). La línea naranja es la <b>tendencia</b>: compara la 2ª mitad vs la 1ª mitad del período. <b style="color:var(--red)">+30%</b> = se consume 30% MÁS que antes; <b style="color:var(--green)">−20%</b> = 20% MENOS.`;
-  }
-
-  // === Dimensiones ===
-  const W = 820, H = 360;
-  const padL = 56, padR = 64, padT = 24, padB = 100;
-  const innerW = W - padL - padR;
-  const innerH = H - padT - padB;
-  const n = display.length;
-  const barSlot = innerW / n;
-  const barW = Math.min(54, barSlot * 0.62);
-
-  const maxQty   = Math.max(1, ...display.map(d => d.value));
-  const trendAbs = Math.max(100, Math.abs(Math.min(0, ...display.map(d => d.trend))), Math.abs(Math.max(0, ...display.map(d => d.trend))));
-  const yQty   = q => padT + innerH - (q/maxQty) * innerH;
-  const yTrend = t => padT + innerH/2 - (t/trendAbs) * (innerH/2 * 0.9);
-
-  // Gridlines Y (2D plano)
-  let grid = '';
-  for(let i = 0; i <= 4; i++){
-    const y = padT + (innerH * i / 4);
-    const v = maxQty * (1 - i/4);
-    grid += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#EEF2F7" stroke-width="1"${i===4?'':' stroke-dasharray="3 4"'}/>`;
-    grid += `<text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="11" font-weight="500" fill="#94A3B8">${Math.round(v).toLocaleString('es-CL')}</text>`;
-  }
-  for(let i = -2; i <= 2; i++){
-    const t = (trendAbs * i / 2);
-    const y = yTrend(t);
-    grid += `<text x="${W-padR+8}" y="${y+4}" font-size="11" font-weight="500" fill="#E55302">${t>=0?'+':''}${Math.round(t)}%</text>`;
-  }
-  grid += `<line x1="${padL}" y1="${yTrend(0)}" x2="${W-padR}" y2="${yTrend(0)}" stroke="#FCC4A0" stroke-width="1" stroke-dasharray="2 4"/>`;
-
-  // === Barras (planas) ===
-  let bars = '', xticks = '', trendPts = [];
-  display.forEach((d, i) => {
-    const r = d.r;
-    const cx = padL + barSlot * (i + 0.5);
-    const xL = cx - barW/2;
-    const yT_ = yQty(d.value);
-    const bH  = padT + innerH - yT_;
-    const fillColor = (r.status==='critico'||r.status==='sin_stock') ? '#C13832'
-                    : (r.status==='reordenar') ? '#F4AA00' : '#0098AA';
-    const unitLbl = ` ${r.unit}`;
-    const dupNote = r.duplicateCount > 1 ? ` · ${r.duplicateCount} registros del mismo nombre sumados` : '';
-    bars += `<g class="fc-bar-group" style="cursor:pointer" onclick="fcOpenMatDetail(${r.matId})">
-      <rect x="${xL}" y="${yT_}" width="${barW}" height="${bH}" fill="${fillColor}">
-        <title>${escHtml(r.material)} — ${fmtQty(d.value)}${unitLbl} · ${(d.trend>=0?'+':'')+d.trend.toFixed(0)}%${dupNote}</title>
+  let bars='', labels='';
+  rows.forEach((r,i)=>{
+    const cx=padL+slot*(i+.5), x=cx-barW/2, yy=y(r.qtyTotal), bh=padT+innerH-yy;
+    const selected = String(_fcSelectedMatId||'') === String(r.matId);
+    const color=r.status.color;
+    const trendTxt = r.trend.dir === 'new' ? 'Nuevo' : r.trend.label;
+    bars+=`<g class="fc-bar-group" style="cursor:pointer" onclick="fcSelectMaterial(${r.matId})">
+      <rect x="${x}" y="${yy}" width="${barW}" height="${bh}" rx="4" fill="${color}" ${selected?`stroke="#1A1F24" stroke-width="2"`:''}>
+        <title>${svgEsc(r.material)} · ${fmtQty(r.qtyTotal)} unidades · ${svgEsc(r.status.label)} · tendencia ${svgEsc(trendTxt)}</title>
       </rect>
-      ${d.value > 0 ? `<text x="${cx}" y="${yT_ - 7}" text-anchor="middle" font-size="11" font-weight="700" fill="${fillColor}">${fmtQty(d.value)}${unitLbl}</text>` : ''}
+      <text x="${cx}" y="${Math.max(14, yy-8)}" text-anchor="middle" font-size="11" font-weight="700" fill="${color}">${fmtQty(r.qtyTotal)}</text>
+      <text x="${cx}" y="${yy+bh+18}" text-anchor="middle" font-size="12" font-weight="700" fill="${r.trend.dir==='up'||r.trend.dir==='new'?'#C13832':r.trend.dir==='down'?'#1F8A4C':'#64748B'}">${r.trend.dir==='up'||r.trend.dir==='new'?'↗':r.trend.dir==='down'?'↘':'→'} ${svgEsc(trendTxt)}</text>
     </g>`;
-    const lbl = r.material.length > 22 ? r.material.slice(0,20) + '…' : r.material;
-    xticks += `<g transform="translate(${cx},${padT+innerH+10}) rotate(-28)">
-      <text text-anchor="end" font-size="12" fill="#36424A" style="font-weight:600">${escHtml(lbl)}</text>
-      <text text-anchor="end" font-size="10" fill="#6A737D" y="13">${escHtml(r.clasif||'—')}</text>
+    const lbl = r.material.length>24 ? r.material.slice(0,22)+'…' : r.material;
+    labels+=`<g transform="translate(${cx},${padT+innerH+40}) rotate(-32)">
+      <text text-anchor="end" font-size="12" fill="#36424A" font-weight="600">${svgEsc(lbl)}</text>
+      <text text-anchor="end" font-size="10" fill="#6A737D" y="13">SAP ${svgEsc(r.sap||'—')}</text>
     </g>`;
-    trendPts.push({x: cx, y: yTrend(d.trend), pct: d.trend});
   });
-
-  // === Línea de tendencia (plana, recta, marcadores cuadrados) ===
-  let trendLine = '';
-  if(trendPts.length >= 2){
-    let path = `M${trendPts[0].x.toFixed(1)},${trendPts[0].y.toFixed(1)}`;
-    for(let i = 1; i < trendPts.length; i++){
-      path += ` L${trendPts[i].x.toFixed(1)},${trendPts[i].y.toFixed(1)}`;
-    }
-    trendLine = `<path d="${path}" fill="none" stroke="#E55302" stroke-width="1.5"/>`;
-    trendPts.forEach(p => {
-      const c = p.pct >= 0 ? '#C13832' : '#1F8A4C';
-      trendLine += `<rect x="${(p.x-3).toFixed(1)}" y="${(p.y-3).toFixed(1)}" width="6" height="6" fill="${c}"/>`;
-    });
-  }
-
-  // === Títulos de ejes ===
-  const axes = `
-    <text x="16" y="${padT + innerH/2}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#64748B" transform="rotate(-90 16 ${padT + innerH/2})">Consumo (unidades del material)</text>
-    <text x="${W-14}" y="${padT + innerH/2}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#E55302" transform="rotate(90 ${W-14} ${padT + innerH/2})">${isMonthView ? '% vs promedio' : 'Tendencia (%)'}</text>`;
-
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
-    ${grid}
-    ${bars}
-    ${trendLine}
-    ${xticks}
-    ${axes}
-  </svg>`;
-
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${grid}${bars}${labels}</svg>`;
   if(legend){
     legend.innerHTML = `
       <span class="lg-item"><span class="lg-bar"></span>Stock OK</span>
       <span class="lg-item"><span class="lg-bar-warn"></span>Por reordenar</span>
       <span class="lg-item"><span class="lg-bar-crit"></span>En alerta / sin stock</span>
-      <span class="lg-item"><span class="lg-line"></span>${isMonthView ? 'Comparación con promedio mensual' : 'Tendencia (subiendo / bajando)'}</span>
-      <span class="lg-item" style="color:var(--muted);font-size:11px">💡 Click en una barra → abre el detalle día a día</span>`;
+      <span class="lg-item"><span class="lg-line"></span>Tendencia (subiendo / bajando)</span>
+      <span class="lg-item" style="color:var(--muted);font-size:11px">💡 Click en una barra → detalle día a día</span>`;
   }
 }
 
-// Compatibilidad: el botón legacy fcFilterByClasif sigue funcionando para los selectores externos
-function fcFilterByClasif(clasif){
-  const sel = document.getElementById('fc-clasif');
-  if(sel){
-    const target = (clasif||'').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
-    for(let i=0; i<sel.options.length; i++){
-      if(sel.options[i].value === target){ sel.value = target; break; }
-    }
-  }
-  renderForecast();
-}
-window.fcFilterByClasif = fcFilterByClasif;
-
-// === Cards individuales: una por material del Top 10 ===
-function fcRenderCards(top10){
-  const el = document.getElementById('fc-cards-grid');
-  if(!el) return;
-  if(!top10.length){
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Sin materiales que mostrar.</div>';
-    return;
-  }
-  el.innerHTML = top10.map(r => {
-    const cardCls = r.status==='critico'||r.status==='sin_stock' ? 'is-critical'
-                  : r.status==='reordenar' ? 'is-reorder'
-                  : r.status==='ok' ? 'is-ok' : '';
-    const trendCls = r.trendPct >= 5 ? 'up' : r.trendPct <= -5 ? 'down' : 'flat';
-    const trendIcon = r.trendPct >= 5 ? '↗' : r.trendPct <= -5 ? '↘' : '→';
-    const trendColor = r.trendPct >= 5 ? '#C13832' : r.trendPct <= -5 ? '#1F8A4C' : '#64748B';
-    const color = (r.status==='critico'||r.status==='sin_stock') ? '#C13832'
-                : r.status==='reordenar' ? '#F4AA00' : '#0098AA';
-    const cov = r.monthsCoverage == null ? '—'
-              : !isFinite(r.monthsCoverage) ? '∞'
-              : (r.monthsCoverage < 10 ? r.monthsCoverage.toFixed(1) : Math.round(r.monthsCoverage));
-    const availCls = r.available <= 0 ? 'warn' : (r.available < r.reorderPoint ? 'warn' : '');
-    return `<div class="fc-mat-card ${cardCls}" onclick="fcOpenMatDetail(${r.matId})" title="Click para ver detalle">
-      <div class="fc-mc-h">
-        <div style="flex:1;min-width:0">
-          <div class="fc-mc-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(r.material)}</div>
-          <div class="fc-mc-sap">SAP ${escHtml(r.sap||'—')} · ${escHtml(r.clasif||'—')}</div>
-        </div>
-        <span style="color:${trendColor};font-weight:700;font-size:12px;white-space:nowrap">${trendIcon} ${(r.trendPct>=0?'+':'')+r.trendPct.toFixed(0)}%</span>
-      </div>
-      <div class="fc-mc-chart">${fcMonthlyBars(r.months, r.values, {w:240, h:90, color, showLabels:true})}</div>
-      <div class="fc-mc-stats">
-        <div class="fc-mc-stat"><span class="lbl">Disponible</span><span class="val ${availCls}">${fmtQty(r.available)} <span class="u">${escHtml(r.unit)}</span></span></div>
-        <div class="fc-mc-stat"><span class="lbl">Consumo/mes</span><span class="val">${r.avgMonthly < 10 ? r.avgMonthly.toFixed(1) : Math.round(r.avgMonthly)} <span class="u">${escHtml(r.unit)}</span></span></div>
-        <div class="fc-mc-stat"><span class="lbl">Total período</span><span class="val">${fmtQty(r.totalConsumed)} <span class="u">${escHtml(r.unit)}</span></span></div>
-        <div class="fc-mc-stat"><span class="lbl">Cobertura (meses)</span><span class="val">${cov}</span></div>
-      </div>
-      <div class="fc-mc-rec">${escHtml(r.recommendation)}</div>
-    </div>`;
-  }).join('');
-}
-
-function initForecastView(){
-  if(_fcInitialized) return;
-  _fcInitialized = true;
-  // Poblar clasificaciones
-  const sel = document.getElementById('fc-clasif');
-  if(sel){
-    const clasifs = [...new Set((state.materials||[]).map(m=>m.clasif).filter(Boolean))].sort();
-    sel.innerHTML = '<option value="">Todas las clasificaciones</option>' +
-      clasifs.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
-  }
-  ['fc-window','fc-critical-only','fc-clasif'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.addEventListener('change', renderForecast);
-  });
-  const search = document.getElementById('fc-tbl-search');
-  if(search) search.addEventListener('input', fcRenderTable);
-  const stSel = document.getElementById('fc-tbl-status');
-  if(stSel) stSel.addEventListener('change', () => { _fcTblStatusFilter = stSel.value; fcRenderTable(); });
-}
-
-function renderForecast(){
-  const cfg = fcCfg();
-  let mats = (state.materials || []).filter(m => !m.deletedAt);
-  if(cfg.criticalOnly) mats = mats.filter(m => m.critico && m.critico.toLowerCase() !== 'ok');
-  if(cfg.clasif)       mats = mats.filter(m => m.clasif === cfg.clasif);
-
-  // Deduplicar por NOMBRE de material (canonicalizado): si existen varias
-  // entradas en el catálogo con el mismo nombre (duplicados con diferente SAP,
-  // por ejemplo), las consolidamos en un único registro de pronóstico que
-  // sumará movimientos y stock de TODOS los duplicados.
-  const groupsByName = {};
-  mats.forEach(m => {
-    const key = (m.material || '').trim().toLowerCase();
-    if(!key) return;
-    if(!groupsByName[key]) groupsByName[key] = { primary: m, aliasIds: [m.id] };
-    else                   groupsByName[key].aliasIds.push(m.id);
-  });
-
-  const results = Object.values(groupsByName)
-    .map(g => computeMaterialForecast(g.primary, cfg, { aliasIds: g.aliasIds }));
-  _fcLastResults = results;
-
-  // Top 10 por consumo en el período (orden descendente)
-  const top10 = [...results]
-    .filter(r => r.totalConsumed > 0)
-    .sort((a,b) => b.totalConsumed - a.totalConsumed)
-    .slice(0, 10);
-  _fcLastTopAll = top10;
-
-  // KPIs
-  const nCrit = results.filter(r => r.status === 'critico' || r.status === 'sin_stock').length;
-  const nReo  = results.filter(r => r.status === 'reordenar').length;
-  const nUp   = results.filter(r => r.trendPct >= 15 && r.avgMonthly > 0).length;
-  const nDn   = results.filter(r => r.trendPct <= -15 && r.avgMonthly > 0).length;
-  const setKpi = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  setKpi('fc-kpi-critical',   nCrit.toLocaleString('es-CL'));
-  setKpi('fc-kpi-reorder',    nReo.toLocaleString('es-CL'));
-  setKpi('fc-kpi-trend',      nUp.toLocaleString('es-CL'));
-  setKpi('fc-kpi-trend-down', nDn.toLocaleString('es-CL'));
-
-  // Hero chart (por MATERIAL) + cards individuales (por material)
-  fcRenderHero(top10);
-  fcRenderCards(top10);
-  const heroSub = document.getElementById('fc-hero-sub');
-  if(heroSub) heroSub.textContent = `${cfg.months} meses · ${results.length} materiales · ${top10.length} con consumo`;
-  const cardsSub = document.getElementById('fc-cards-sub');
-  if(cardsSub) cardsSub.textContent = `${top10.length} materiales`;
-  fcRenderTable();
-}
-window.renderForecast = renderForecast;
-
-function fcStatusBadge(status){
-  const L = {sin_stock:'Sin stock', critico:'En alerta', reordenar:'Por reordenar', ok:'OK', exceso:'Exceso', sin_movimiento:'Sin consumo'};
-  return `<span class="fc-status ${status.replace('_','-')}">${L[status]||status}</span>`;
-}
-
-function fcTrendBadge(pct){
-  if(!isFinite(pct) || pct === 0) return `<span class="fc-trend flat">— 0%</span>`;
-  const abs = Math.abs(pct);
-  if(abs < 5)  return `<span class="fc-trend flat">→ ${pct.toFixed(0)}%</span>`;
-  if(pct > 0)  return `<span class="fc-trend up">↗ +${pct.toFixed(0)}%</span>`;
-  return `<span class="fc-trend down">↘ ${pct.toFixed(0)}%</span>`;
-}
-
-function fcRenderTable(){
+function fcRenderTopTable(rows){
   const tb = document.querySelector('#fc-tbl tbody');
   if(!tb) return;
-  const search = (document.getElementById('fc-tbl-search')?.value || '').toLowerCase().trim();
-  const statusFil = _fcTblStatusFilter || (document.getElementById('fc-tbl-status')?.value || '');
-  const statusRank = {sin_stock:0, critico:1, reordenar:2, ok:3, exceso:4, sin_movimiento:5};
-  let rows = [..._fcLastResults].sort((a,b) => {
-    const ra = statusRank[a.status] ?? 9, rb = statusRank[b.status] ?? 9;
-    if(ra !== rb) return ra - rb;
-    const ca = a.monthsCoverage==null ? Infinity : a.monthsCoverage;
-    const cb = b.monthsCoverage==null ? Infinity : b.monthsCoverage;
-    return ca - cb;
-  });
-  if(statusFil) rows = rows.filter(r => r.status === statusFil);
-  if(search){
-    rows = rows.filter(r => `${r.material||''} ${r.sap||''} ${r.clasif||''}`.toLowerCase().includes(search));
-  }
-  const cnt = document.getElementById('fc-tbl-count');
-  if(cnt) cnt.textContent = `${rows.length.toLocaleString('es-CL')} / ${_fcLastResults.length.toLocaleString('es-CL')}`;
   if(!rows.length){
-    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">Sin materiales que coincidan.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin datos.</td></tr>';
     return;
   }
-  tb.innerHTML = rows.map(r => {
-    const trCls = r.status==='critico'||r.status==='sin_stock' ? 'is-critical'
-                : r.status==='reordenar' ? 'is-reorder' : '';
-    const cov = r.monthsCoverage==null ? '—'
-              : !isFinite(r.monthsCoverage) ? '∞'
-              : (r.monthsCoverage < 10 ? r.monthsCoverage.toFixed(1) : Math.round(r.monthsCoverage));
-    const color = (r.status==='critico'||r.status==='sin_stock') ? '#C13832'
-                : r.status==='reordenar' ? '#F4AA00' : '#0098AA';
-    return `<tr class="${trCls}" ondblclick="fcOpenMatDetail(${r.matId})">
-      <td>
-        <div style="font-weight:600;color:var(--ink);font-size:13px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(r.material)}</div>
-        <div style="font-size:11px;color:var(--muted)">SAP ${escHtml(r.sap||'—')}${r.critico && r.critico.toLowerCase()!=='ok' ? ` · <b style="color:#DC2626">${escHtml(r.critico)}</b>` : ''}</div>
-      </td>
-      <td><small style="color:var(--muted)">${escHtml(r.clasif||'—')}</small></td>
-      <td class="num"><b>${fmtQty(r.available)}</b> <small style="color:var(--muted)">${escHtml(r.unit)}</small>${r.reserved>0?`<br><small style="color:#B45309">−${fmtQty(r.reserved)} rsv</small>`:''}</td>
-      <td class="num">${r.avgMonthly < 10 ? r.avgMonthly.toFixed(1) : Math.round(r.avgMonthly)} <small style="color:var(--muted)">${escHtml(r.unit)}</small></td>
-      <td class="num">${fcTrendBadge(r.trendPct)}</td>
-      <td class="num"><b>${fmtQty(r.totalConsumed)}</b> <small style="color:var(--muted)">${escHtml(r.unit)}</small></td>
-      <td class="num">${cov}</td>
-      <td>${fcStatusBadge(r.status)}</td>
-      <td>${fcMonthlyBars(r.months, r.values, {w:120, h:32, color})}</td>
+  tb.innerHTML = rows.map((r,i)=>{
+    const cls = r.status.key === 'sin_stock' ? 'sin-stock' : r.status.key;
+    const tcls = r.trend.dir === 'up' || r.trend.dir === 'new' ? 'up' : r.trend.dir === 'down' ? 'down' : 'flat';
+    return `<tr onclick="fcSelectMaterial(${r.matId})" title="Ver detalle día a día" style="cursor:pointer">
+      <td><span class="rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span></td>
+      <td><b>${escHtml(r.material)}</b><br><small style="color:var(--muted)">${escHtml(r.clasif||'—')} · SAP ${escHtml(r.sap||'—')}</small></td>
+      <td class="num"><b>${fmtQty(r.qtyTotal)}</b></td>
+      <td class="num">${r.count}</td>
+      <td class="num">${fmtQty(r.stock)}</td>
+      <td><span class="fc-status ${cls}">${escHtml(r.status.label)}</span></td>
+      <td><span class="fc-trend ${tcls}">${r.trend.dir==='up'||r.trend.dir==='new'?'↗':r.trend.dir==='down'?'↘':'→'} ${escHtml(r.trend.dir==='new'?'Nuevo':r.trend.label)}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${r.lastTs ? fmtDate(r.lastTs.slice(0,10)) : '—'}</td>
     </tr>`;
   }).join('');
 }
-window.fcRenderTable = fcRenderTable;
 
-function fcFilterByStatus(status){
-  _fcTblStatusFilter = status;
-  const sel = document.getElementById('fc-tbl-status');
-  if(sel) sel.value = status;
-  fcRenderTable();
-  document.getElementById('fc-tbl').scrollIntoView({behavior:'smooth', block:'start'});
+function fcSelectMaterial(matId){
+  _fcSelectedMatId = matId;
+  fcRenderTopChart(_fcLastRows.slice(0,10));
+  fcRenderDetail(matId);
 }
-window.fcFilterByStatus = fcFilterByStatus;
+window.fcSelectMaterial = fcSelectMaterial;
 
-function fcOpenMatDetail(matId){
-  const mat = state.materials.find(m => m.id === matId);
-  if(!mat) return;
-  _fcDetailState.matId = matId;
-  // Por defecto, mostrar el último mes con consumo (o el último si todos en 0).
-  // Calcular aliasIds para que el cómputo abarque duplicados del catálogo.
-  const cfg = fcCfg();
-  const nameKey = (mat.material || '').trim().toLowerCase();
-  const aliasIds = (state.materials || [])
-    .filter(x => !x.deletedAt && (x.material || '').trim().toLowerCase() === nameKey)
-    .map(x => x.id);
-  const r = computeMaterialForecast(mat, cfg, { aliasIds });
-  let defaultIdx = r.values.length - 1;
-  while(defaultIdx > 0 && r.values[defaultIdx] === 0) defaultIdx--;
-  _fcDetailState.selectedMonthIdx = defaultIdx;
-  fcRenderDetail();
-  // Mostrar el modal
-  let m = document.getElementById('fc-detail-modal');
-  if(!m){
-    m = document.createElement('div');
-    m.id = 'fc-detail-modal';
-    m.className = 'modal-bg';
-    m.innerHTML = `<div class="modal large" style="max-width:820px"></div>`;
-    m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
-    document.body.appendChild(m);
-  }
-  m.classList.add('open');
+function fcClearDetail(scroll){
+  _fcSelectedMatId = null;
+  const card = document.getElementById('fc-detail-card');
+  if(card) card.style.display='none';
+  const content = document.getElementById('fc-detail-content');
+  if(content) content.innerHTML='';
+  if(scroll !== false) fcRenderTopChart(_fcLastRows.slice(0,10));
 }
-window.fcOpenMatDetail = fcOpenMatDetail;
+window.fcClearDetail = fcClearDetail;
 
-// Estado del modal de detalle: qué material y qué mes está seleccionado para
-// el drill-down día a día.
-let _fcDetailState = { matId: null, selectedMonthIdx: 0 };
+function fcRenderDetail(matId){
+  const row = _fcLastRows.find(r => String(r.matId) === String(matId));
+  const card = document.getElementById('fc-detail-card');
+  const content = document.getElementById('fc-detail-content');
+  if(!row || !card || !content) return;
+  card.style.display='block';
+  const title = document.getElementById('fc-detail-title');
+  const sub = document.getElementById('fc-detail-sub');
+  if(title) title.textContent = `Detalle · ${row.material}`;
+  if(sub) sub.textContent = `${row.status.label} · ${fmtQty(row.qtyTotal)} unidades en ${row.count} salidas`;
 
-// Construye la serie diaria de un material acotada a un mes específico.
-// Acepta el material primario + lista de aliasIds (catálogo duplicado) para
-// sumar TODOS los movimientos que comparten el mismo nombre.
-function fcDailySeriesForMonth(matOrId, month, aliasIds){
-  // Resolver al material primario y sus aliases
-  let mat = matOrId;
-  if(typeof matOrId === 'number'){
-    mat = (state.materials || []).find(x => x.id === matOrId);
-  }
-  if(!mat) return [];
-  const ids = aliasIds && aliasIds.length ? aliasIds : [mat.id];
-  const nameKey = (mat.material || '').trim().toLowerCase();
+  const days = [...row.days.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([day,qty])=>({day,qty}));
+  const dailyChart = fcDailyDetailChart(days, row.status.color);
+  const movs = [...row.movements].sort((a,b)=>(b.timestamp||'').localeCompare(a.timestamp||''));
+  const rowsHtml = movs.map(m=>{
+    const day = m.timestamp ? m.timestamp.slice(0,10) : (m.date || '');
+    return `<tr>
+      <td>${escHtml(day ? fmtDate(day) : '—')}</td>
+      <td><span class="tag salida">salida</span></td>
+      <td class="num"><b>${fmtQty(m.qty)}</b></td>
+      <td>${escHtml(AREA_LABEL[m.area]||m.area||'—')}</td>
+      <td>${escHtml(DEST_LABEL[m.destino]||m.destino||'—')}</td>
+      <td>${escHtml(m.resp||m.user||'—')}</td>
+      <td>${escHtml(m.ot||m.doc||m.activity||'—')}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">Sin movimientos.</td></tr>';
 
-  // Lista completa de días del mes (relleno con ceros)
-  const start = new Date(month.from + 'T00:00:00');
-  const end   = new Date(month.to   + 'T00:00:00');
-  const days = [];
-  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
-    days.push({
-      day: d.toISOString().slice(0,10),
-      dayNum: d.getDate(),
-      qty: 0,
-      events: []
-    });
-  }
-  // Llenar con los movimientos (match por matId-alias O por nombre normalizado)
-  (state.movements || []).forEach(mv => {
-    const byId   = ids.includes(mv.matId);
-    const byName = nameKey && (mv.material || '').trim().toLowerCase() === nameKey;
-    if(!byId && !byName) return;
-    if(mv.type !== 'salida') return;
-    if(mv._adjustment || mv.isTransfer) return;
-    const day = mv.date || (mv.timestamp ? mv.timestamp.slice(0,10) : null);
-    if(!day || day < month.from || day > month.to) return;
-    const bucket = days.find(x => x.day === day);
-    if(bucket){
-      bucket.qty += (mv.qty || 0);
-      bucket.events.push(mv);
-    }
-  });
-  return days;
-}
-
-function fcSelectMonth(idx){
-  _fcDetailState.selectedMonthIdx = idx;
-  fcRenderDetail();
-}
-window.fcSelectMonth = fcSelectMonth;
-
-function fcRenderDetail(){
-  const m = document.getElementById('fc-detail-modal');
-  if(!m) return;
-  const mat = state.materials.find(x => x.id === _fcDetailState.matId);
-  if(!mat) return;
-  const cfg = fcCfg();
-  // Calcular aliasIds para este nombre (consolidar duplicados del catálogo)
-  const nameKey = (mat.material || '').trim().toLowerCase();
-  const aliasIds = (state.materials || [])
-    .filter(x => !x.deletedAt && (x.material || '').trim().toLowerCase() === nameKey)
-    .map(x => x.id);
-  const r = computeMaterialForecast(mat, cfg, { aliasIds });
-  const color = (r.status==='critico'||r.status==='sin_stock') ? '#C13832'
-              : r.status==='reordenar' ? '#F4AA00' : '#0098AA';
-  const cov = r.monthsCoverage == null ? '—'
-            : !isFinite(r.monthsCoverage) ? '∞'
-            : (r.monthsCoverage < 10 ? r.monthsCoverage.toFixed(1) : Math.round(r.monthsCoverage));
-
-  // === Gráfico MENSUAL interactivo (barras clicables) ===
-  const monthsChart = fcMonthlyBarsInteractive(r.months, r.values, _fcDetailState.selectedMonthIdx, color, r.unit);
-
-  // === Drill-down: serie diaria del mes seleccionado ===
-  const selIdx = _fcDetailState.selectedMonthIdx;
-  const selMonth = r.months[selIdx];
-  const days = fcDailySeriesForMonth(mat, selMonth, aliasIds);
-  const dayValues = days.map(d => d.qty);
-  const totalMonth = dayValues.reduce((s,v) => s+v, 0);
-  const activeDays = days.filter(d => d.qty > 0).length;
-  const peakDay = days.reduce((best, d) => (!best || d.qty > best.qty) ? d : best, null);
-  const avgActiveDay = activeDays > 0 ? totalMonth / activeDays : 0;
-  const dailyChart = fcDailyBars(days, color, r.unit);
-
-  // Lista de eventos del mes (cada salida con su detalle)
-  const allEvents = [];
-  days.forEach(d => d.events.forEach(ev => allEvents.push({...ev, day:d.day})));
-  allEvents.sort((a,b) => (b.timestamp||b.day).localeCompare(a.timestamp||a.day));
-
-  const eventRows = allEvents.length
-    ? allEvents.slice(0, 12).map(ev => `
-        <tr>
-          <td style="white-space:nowrap"><b>${escHtml(fmtDate(ev.day))}</b></td>
-          <td>${escHtml(ev.ot||'—')}</td>
-          <td>${escHtml(DEST_LABEL[ev.destino]||ev.destino||'—')}</td>
-          <td>${escHtml(AREA_LABEL[ev.area]||ev.area||'—')}</td>
-          <td style="text-align:right;font-weight:600">${fmtQty(ev.qty)} <small style="color:var(--muted);font-weight:400">${escHtml(r.unit)}</small></td>
-          <td style="font-size:12px;color:var(--muted)">${escHtml(ev.activity||ev.notes||'—')}</td>
-        </tr>`).join('')
-    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px;font-style:italic">Sin consumos registrados en ${escHtml(selMonth.label)}.</td></tr>`;
-
-  const html = `<div style="padding:14px 18px;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:14px">
-      <div>
-        <h3 style="margin:0 0 4px;font-size:18px">${escHtml(mat.material)}</h3>
-        <div style="color:var(--muted);font-size:13px">SAP ${escHtml(mat.sap||'—')} · ${escHtml(mat.clasif||'—')}</div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fc-detail-modal').classList.remove('open')">✕</button>
+  const activeDays = days.length;
+  const peak = days.reduce((best,d)=>!best || d.qty>best.qty ? d : best, null);
+  content.innerHTML = `
+    <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:14px">
+      <div class="kpi"><div class="kpi-label">Stock actual</div><div class="kpi-value" style="font-size:24px">${fmtQty(row.stock)}</div><div class="kpi-sub">unidades disponibles</div></div>
+      <div class="kpi teal"><div class="kpi-label">Consumo total</div><div class="kpi-value" style="font-size:24px">${fmtQty(row.qtyTotal)}</div><div class="kpi-sub">en período seleccionado</div></div>
+      <div class="kpi"><div class="kpi-label">Días con uso</div><div class="kpi-value" style="font-size:24px">${activeDays}</div><div class="kpi-sub">días con salidas</div></div>
+      <div class="kpi yellow"><div class="kpi-label">Peak diario</div><div class="kpi-value" style="font-size:24px">${peak ? fmtQty(peak.qty) : '0'}</div><div class="kpi-sub">${peak ? fmtDate(peak.day) : '—'}</div></div>
     </div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px">
-      <div class="kpi"><div class="kpi-label">Disponible</div><div class="kpi-value" style="font-size:20px">${fmtQty(r.available)} <span style="font-size:12px;color:var(--muted);font-weight:600">${escHtml(r.unit)}</span></div></div>
-      <div class="kpi teal"><div class="kpi-label">Consumo/mes</div><div class="kpi-value" style="font-size:20px">${r.avgMonthly < 10 ? r.avgMonthly.toFixed(1) : Math.round(r.avgMonthly)} <span style="font-size:12px;color:var(--muted);font-weight:600">${escHtml(r.unit)}</span></div></div>
-      <div class="kpi"><div class="kpi-label">Total consumido</div><div class="kpi-value" style="font-size:20px">${fmtQty(r.totalConsumed)} <span style="font-size:12px;color:var(--muted);font-weight:600">${escHtml(r.unit)}</span></div></div>
-      <div class="kpi"><div class="kpi-label">Mes con + consumo</div><div class="kpi-value" style="font-size:15px;text-transform:capitalize">${escHtml(r.peakMonthLabel)}</div></div>
-      <div class="kpi"><div class="kpi-label">Cobertura (meses)</div><div class="kpi-value" style="font-size:20px">${cov}</div></div>
-    </div>
-
-    <!-- MENSUAL: bars clicables -->
     <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-        <span>Consumo mensual · últimos ${cfg.months} meses</span>
-        <span style="font-size:11.5px;color:var(--muted);font-weight:400">💡 Haz click en una barra para ver el detalle día a día</span>
-      </div>
-      ${monthsChart}
-    </div>
-
-    <!-- DIARIO: detalle del mes seleccionado -->
-    <div style="background:#FAFAFA;border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span>Día a día · <span style="color:${color};text-transform:capitalize">${escHtml(selMonth.label)}</span></span>
-        <span style="font-size:11.5px;color:var(--muted);font-weight:400">${activeDays} día${activeDays===1?'':'s'} con consumo · pico: ${peakDay ? fmtQty(peakDay.qty)+' '+r.unit+' el '+fmtDate(peakDay.day) : '—'}</span>
-      </div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Detalle día a día</div>
       ${dailyChart}
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:12px">
-        <div class="fc-mc-stat"><span class="lbl">Total mes</span><span class="val">${fmtQty(totalMonth)} <span class="u">${escHtml(r.unit)}</span></span></div>
-        <div class="fc-mc-stat"><span class="lbl">Días activos</span><span class="val">${activeDays} / ${days.length}</span></div>
-        <div class="fc-mc-stat"><span class="lbl">Día con + consumo</span><span class="val" style="font-size:13px">${peakDay && peakDay.qty>0 ? fmtDate(peakDay.day) : '—'}</span></div>
-        <div class="fc-mc-stat"><span class="lbl">Promedio (días activos)</span><span class="val">${activeDays>0 ? (avgActiveDay<10 ? avgActiveDay.toFixed(1) : Math.round(avgActiveDay)) : '0'} <span class="u">${escHtml(r.unit)}</span></span></div>
-      </div>
     </div>
-
-    <!-- Tabla con los eventos del mes -->
-    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:0;margin-bottom:14px;overflow:hidden">
-      <div style="font-size:13px;font-weight:600;padding:11px 14px;border-bottom:1px solid var(--line);background:#F8FAFC">
-        Movimientos de ${escHtml(selMonth.label)}${allEvents.length>12?` <span style="color:var(--muted);font-weight:400;font-size:11.5px">(mostrando los 12 más recientes de ${allEvents.length})</span>`:''}
-      </div>
-      <table class="t" style="margin:0;border:none">
-        <thead><tr>
-          <th>Fecha</th><th>OT</th><th>Destino</th><th>Origen</th>
-          <th style="text-align:right">Cant.</th><th>Actividad / Notas</th>
-        </tr></thead>
-        <tbody>${eventRows}</tbody>
+    <div class="table-wrap">
+      <table class="t">
+        <thead><tr><th>Fecha</th><th>Tipo</th><th class="num">Cantidad</th><th>Origen</th><th>Destino</th><th>Responsable</th><th>OT / Actividad</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
       </table>
-    </div>
-
-    <div style="padding:11px 13px;background:#F8FAFC;border-left:3px solid ${color};border-radius:6px;font-size:13px;line-height:1.5">
-      <b>Recomendación:</b> ${escHtml(r.recommendation)}
-    </div>
-    <div style="margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.5">
-      Las barras muestran el consumo de cada mes, tomado directamente del historial de movimientos (salidas registradas).
-    </div>
-  </div>`;
-
-  m.querySelector('.modal').innerHTML = html;
+    </div>`;
+  card.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-// Versión de fcMonthlyBars con barras clicables y mes resaltado (2D plano)
-function fcMonthlyBarsInteractive(months, values, selectedIdx, color, unit){
-  const w = 720, h = 220;
-  const padL = 36, padR = 12, padT = 18, padB = 38;
-  const innerW = w - padL - padR;
-  const innerH = h - padT - padB;
-  const n = values.length;
-  if(!n) return '';
-  const max = Math.max(1, ...values);
-  const barSlot = innerW / n;
-  const barW = barSlot * 0.6;
-  const gray = '#CBD5E1';
-  const u = unit || 'UN';
-
-  // Y gridlines (4 ticks)
-  let grid = '';
-  for(let i = 0; i <= 4; i++){
-    const y = padT + (innerH * i / 4);
-    const v = max * (1 - i/4);
-    grid += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#EEF2F7" stroke-width="1"${i===4?'':' stroke-dasharray="3 4"'}/>`;
-    grid += `<text x="${padL-6}" y="${y+3.5}" text-anchor="end" font-size="10.5" font-weight="500" fill="#94A3B8">${Math.round(v).toLocaleString('es-CL')}</text>`;
+function fcDailyDetailChart(days, color){
+  if(!days.length) return '<div class="fc-empty">Sin días con consumo para este material.</div>';
+  const W=860, H=240, padL=52, padR=18, padT=22, padB=52;
+  const innerW=W-padL-padR, innerH=H-padT-padB;
+  const max=Math.max(1,...days.map(d=>d.qty));
+  const slot=innerW/days.length, barW=Math.max(7, Math.min(34, slot*.64));
+  const y=q=>padT+innerH-(q/max)*innerH;
+  let grid='';
+  for(let i=0;i<=3;i++){
+    const yy=padT+innerH*i/3, val=max*(1-i/3);
+    grid+=`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#EEF2F7" stroke-width="1"${i===3?'':' stroke-dasharray="3 4"'}/>`;
+    grid+=`<text x="${padL-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="#94A3B8">${Math.round(val).toLocaleString('es-CL')}</text>`;
   }
-
-  let bars = '', labels = '';
-  months.forEach((mo, i) => {
-    const cx = padL + barSlot * (i + 0.5);
-    const xL = cx - barW/2;
-    const bH = (values[i]/max) * innerH;
-    const yT = padT + innerH - bH;
-    const isSelected = i === selectedIdx;
-    const fillColor = isSelected ? color : gray;
-    const stroke = isSelected ? `stroke="${color}" stroke-width="1.5"` : '';
-    bars += `<g class="fc-bar-group" style="cursor:pointer" onclick="fcSelectMonth(${i})">
-      <rect x="${padL+i*barSlot}" y="${padT}" width="${barSlot}" height="${innerH}" fill="transparent"/>
-      <rect x="${xL}" y="${yT}" width="${barW}" height="${bH}" fill="${fillColor}" ${stroke}/>
-      ${values[i] > 0 ? `<text x="${cx}" y="${yT - 6}" text-anchor="middle" font-size="11" font-weight="${isSelected?700:600}" fill="${isSelected?color:'#64748B'}">${fmtQty(values[i])} ${escHtml(u)}</text>` : ''}
-    </g>`;
-    labels += `<text x="${cx}" y="${h-12}" text-anchor="middle" font-size="11.5" font-weight="${isSelected?700:500}" fill="${isSelected?color:'#64748B'}" style="text-transform:capitalize">${escHtml(mo.label)}</text>`;
+  let bars='', labels='';
+  days.forEach((d,i)=>{
+    const cx=padL+slot*(i+.5), x=cx-barW/2, yy=y(d.qty), bh=padT+innerH-yy;
+    bars+=`<rect x="${x}" y="${yy}" width="${barW}" height="${bh}" rx="3" fill="${color}"><title>${svgEsc(fmtDate(d.day))}: ${fmtQty(d.qty)} unidades</title></rect>`;
+    labels+=`<text x="${cx}" y="${H-18}" text-anchor="middle" font-size="10.5" fill="#64748B" transform="rotate(-35 ${cx} ${H-18})">${svgEsc(fmtDate(d.day).replace('/2026',''))}</text>`;
   });
-
-  // Línea de tendencia (plana)
-  const reg = fcLinearRegression(values);
-  const trendY = i => padT + innerH - (Math.max(0, reg.slope*i + reg.intercept) / max) * innerH;
-  let trend = '';
-  if(n >= 2){
-    const x0 = padL + 0.5*barSlot, xN = padL + (n-0.5)*barSlot;
-    trend = `<line x1="${x0}" y1="${trendY(0)}" x2="${xN}" y2="${trendY(n-1)}" stroke="#E55302" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  }
-
-  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">
-    ${grid}
-    ${bars}
-    ${trend}
-    ${labels}
-  </svg>`;
-}
-
-// Gráfico DIARIO: una barra por día del mes (2D plano)
-function fcDailyBars(days, color, unit){
-  const w = 720, h = 200;
-  const padL = 36, padR = 12, padT = 18, padB = 32;
-  const innerW = w - padL - padR;
-  const innerH = h - padT - padB;
-  const n = days.length;
-  if(!n) return '';
-  const max = Math.max(1, ...days.map(d => d.qty));
-  const slot = innerW / n;
-  const barW = Math.max(2.5, slot - 2.5);
-  const u = unit || 'UN';
-
-  // Y gridlines
-  let grid = '';
-  for(let i = 0; i <= 3; i++){
-    const y = padT + (innerH * i / 3);
-    const v = max * (1 - i/3);
-    grid += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#EEF2F7" stroke-width="1"${i===3?'':' stroke-dasharray="3 4"'}/>`;
-    grid += `<text x="${padL-6}" y="${y+3.5}" text-anchor="end" font-size="10.5" font-weight="500" fill="#94A3B8">${Math.round(v).toLocaleString('es-CL')}</text>`;
-  }
-
-  let bars = '';
-  days.forEach((d, i) => {
-    const cx = padL + slot * (i + 0.5);
-    const xL = cx - barW/2;
-    const bH = (d.qty/max) * innerH;
-    const yT = padT + innerH - bH;
-    if(d.qty > 0){
-      bars += `<rect x="${xL}" y="${yT}" width="${barW}" height="${bH}" fill="${color}">
-        <title>${fmtDate(d.day)} · ${fmtQty(d.qty)} ${escHtml(u)}</title>
-      </rect>`;
-    }
-  });
-
-  // Etiquetas X
-  let xlabels = '';
-  days.forEach((d, i) => {
-    if(d.dayNum === 1 || d.dayNum % 5 === 0 || i === n-1){
-      const cx = padL + slot * (i + 0.5);
-      xlabels += `<text x="${cx}" y="${h-12}" text-anchor="middle" font-size="10.5" font-weight="500" fill="#64748B">${d.dayNum}</text>`;
-    }
-  });
-
-  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">
-    ${grid}
-    ${bars}
-    ${xlabels}
-  </svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">${grid}${bars}${labels}</svg>`;
 }
 
 function exportForecast(){
-  if(typeof XLSX === 'undefined'){ toast('Librería Excel no cargada','err'); return; }
-  if(!_fcLastResults || !_fcLastResults.length){ toast('Recalcula primero el pronóstico.','warn'); return; }
-  const cfg = fcCfg();
-  // Cabecera dinámica con etiquetas de meses
-  const monthLabels = _fcLastResults[0]?.months?.map(m => m.label) || [];
-  const header = [
-    'Material','SAP','Clasificación','Unidad','Crítico',
-    'Stock total','Reservado','Disponible',
-    ...monthLabels,
-    'Promedio consumo/mes','Tendencia % (2ª mitad vs 1ª)',
-    'Total período','Cobertura (meses)','Estado','Faltan p/ cubrir 1 mes','Observación'
-  ];
-  const rows = _fcLastResults.map(r => [
-    r.material, r.sap||'', r.clasif||'', r.unit||'UN', r.critico||'',
-    r.totalStock, r.reserved, r.available,
-    ...r.values,
-    +r.avgMonthly.toFixed(2), +r.trendPct.toFixed(1),
-    r.totalConsumed,
-    r.monthsCoverage==null ? '—' : (!isFinite(r.monthsCoverage) ? '∞' : +r.monthsCoverage.toFixed(1)),
-    ({sin_stock:'Sin stock',critico:'En alerta',reordenar:'Por reordenar',ok:'OK',exceso:'Exceso',sin_movimiento:'Sin consumo'})[r.status] || r.status,
-    r.toBuyForMonth || 0,
-    r.recommendation
-  ]);
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-  const cols = [{wch:38},{wch:11},{wch:16},{wch:8},{wch:10},{wch:10},{wch:10},{wch:10}];
-  monthLabels.forEach(()=>cols.push({wch:10}));
-  cols.push({wch:14},{wch:14},{wch:11},{wch:18},{wch:13},{wch:18},{wch:60});
-  ws['!cols'] = cols;
-  XLSX.utils.book_append_sheet(wb, ws, 'Consumo mensual');
-  XLSX.writeFile(wb, `Consumo_Mensual_SINFRA_${todayStr()}.xlsx`);
-  toast(`Excel descargado con ${rows.length.toLocaleString('es-CL')} materiales.`, 'ok');
+  toast('Esta versión del pronóstico es visual. Exportación se puede agregar después sin tocar el cálculo del Dashboard.','warn');
 }
 window.exportForecast = exportForecast;
 </script>
