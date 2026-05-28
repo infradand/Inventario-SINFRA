@@ -27,7 +27,13 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
 button{font-family:inherit}
 
 /* HEADER */
-.app-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+/* Barra superior unificada: el header y las pestañas viajan juntos dentro de
+   un mismo contenedor sticky. Antes el header iba sticky en top:0 y las
+   pestañas en top:62px (valor fijo); si la altura real del header no era
+   exactamente 62px, la barra de pestañas quedaba "a la mitad" al hacer scroll.
+   Ahora ambos comparten el sticky de .topbar y siempre quedan pegados arriba. */
+.topbar{position:sticky;top:0;z-index:50;background:#fff}
+.app-header{background:#fff;border-bottom:1px solid var(--line)}
 .app-header-inner{display:flex;align-items:center;gap:18px;padding:10px 20px;max-width:1400px;margin:0 auto}
 .logo{display:flex;align-items:center;gap:12px}
 .logo-imgs{display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -44,7 +50,7 @@ button{font-family:inherit}
 .user-pill .dot{width:8px;height:8px;background:var(--green);border-radius:50%}
 
 /* TABS */
-.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:62px;z-index:40;overflow-x:auto}
+.tabs{background:#fff;border-bottom:1px solid var(--line);z-index:40;overflow-x:auto}
 .tabs-inner{display:flex;max-width:1400px;margin:0 auto;padding:0 12px;gap:4px}
 .tab{padding:14px 18px;border:0;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);
   border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px;white-space:nowrap;transition:all .15s}
@@ -1941,6 +1947,15 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 .ota-rsv-tbl tbody tr.ota-rsv-row.is-urgent{ background:#FEE2E2 }
 .ota-rsv-tbl tbody tr.ota-rsv-row.is-urgent:hover{ background:#FCA5A5 }
 .ota-rsv-tbl tbody td.num{ text-align:right; font-weight:500; white-space:nowrap }
+.ota-rsv-toggle-wrap{ margin-top:6px }
+.ota-rsv-toggle{ display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:20px;
+  background:#FEF3C7; color:#B45309; border:1px solid #FCD34D; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s }
+.ota-rsv-toggle svg{ width:12px; height:12px }
+.ota-rsv-toggle:hover{ background:#FDE68A }
+.ota-rsv-toggle.active{ background:#B45309; color:#fff; border-color:#B45309 }
+.ota-rsv-toggle.has-urgent{ background:#FEE2E2; color:#DC2626; border-color:#FCA5A5 }
+.ota-rsv-toggle.has-urgent:hover{ background:#FECACA }
+.ota-rsv-toggle.has-urgent.active{ background:#DC2626; color:#fff; border-color:#DC2626 }
 .ota-urgent-badge{
   display:inline-block;
   margin-top:4px;
@@ -2200,6 +2215,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
 })();
 </script>
 
+<div class="topbar">
 <header class="app-header">
   <div class="app-header-inner">
     <div class="logo">
@@ -2273,6 +2289,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
     </button>
   </div>
 </nav>
+</div>
 
 <main>
 
@@ -2321,6 +2338,8 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
     <div class="kpi orange"><div class="kpi-label">Reservas activas</div><div class="kpi-value" id="kpi-reserved">0</div><div class="kpi-sub" id="kpi-reserved-sub">unidades comprometidas</div></div>
     <div class="kpi yellow"><div class="kpi-label" id="kpi-mov-label">Movimientos (semana)</div><div class="kpi-value" id="kpi-today">0</div><div class="kpi-sub" id="kpi-mov-sub">entradas + salidas + devol.</div></div>
     <div class="kpi red"><div class="kpi-label">Materiales críticos</div><div class="kpi-value" id="kpi-crit">0</div><div class="kpi-sub">requieren reposición</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="switchView('otanalysis')" title="Ir a Análisis OT"><div class="kpi-label">OTs con consumo</div><div class="kpi-value" id="kpi-ot-count">0</div><div class="kpi-sub" id="kpi-ot-count-sub">en el período</div></div>
+    <div class="kpi teal" style="cursor:pointer" onclick="switchView('otanalysis')" title="Ir a Análisis OT"><div class="kpi-label">OT con más consumo</div><div class="kpi-value" id="kpi-ot-top" style="font-size:18px">—</div><div class="kpi-sub" id="kpi-ot-top-sub">—</div></div>
   </div>
 
   <div id="alerts-container"></div>
@@ -2778,6 +2797,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
         <option value="Ventiladores">Ventiladores</option>
       </select>
       <span class="count" id="inv-count">0 / 0</span>
+      <button class="btn btn-sm" id="btn-export-inv" onclick="exportInventarioFiltrado()" title="Descarga un Excel con exactamente las filas que se ven ahora (respeta todos los filtros aplicados).">⬇ Exportar filtrado</button>
       <button class="btn btn-sm" id="btn-load-sap" onclick="document.getElementById('file-sap-reservas').click()" title="Carga el Excel 'Copia de reservas Sinfra' descargado de SharePoint para vincular estado de compras por material.">📋 Cargar reservas SAP</button>
       <input type="file" id="file-sap-reservas" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none" onchange="loadSapReservasFromFile(event)">
     </div>
@@ -2904,6 +2924,7 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
         <option value="cancelled">Canceladas</option>
       </select>
       <span class="count" id="rsv-tbl-count">0 / 0</span>
+      <button class="btn btn-sm" id="btn-export-rsv" onclick="exportReservasFiltrado()" title="Descarga un Excel con exactamente las reservas que se ven ahora (respeta los filtros aplicados).">⬇ Exportar filtrado</button>
     </div>
     <div class="table-wrap">
       <table class="t" id="rsv-tbl">
@@ -2972,7 +2993,13 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
   </div>
 
   <div class="card">
-    <div class="card-h"><span id="ota-results-title">Resultados</span></div>
+    <div class="card-h" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <span id="ota-results-title">Resultados</span>
+      <button type="button" id="ota-only-rsv-btn" class="ota-rsv-toggle" onclick="toggleOtaOnlyRsv(this)" title="Mostrar solo las OT que tienen reservas activas, con sus reservas desplegadas">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Ver OTs con reservas
+      </button>
+    </div>
     <div id="ota-results"></div>
   </div>
 </section>
@@ -3619,6 +3646,55 @@ tr.rsv-inactive td:nth-child(10){opacity:1}
   </div>
 </div>
 
+<!-- ============== EDITAR RESERVA ============== -->
+<div class="modal-bg" id="edit-rsv-modal">
+  <div class="modal large">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Editar reserva
+    </h3>
+    <p id="er-mat-line" style="font-size:13px;color:var(--muted);margin:-4px 0 14px"></p>
+    <div class="form-grid">
+      <div class="field">
+        <label>Cantidad reservada</label>
+        <input type="number" id="er-qty" min="0" step="1">
+      </div>
+      <div class="field">
+        <label>Área (origen)</label>
+        <select id="er-area"></select>
+      </div>
+      <div class="field">
+        <label>Destino</label>
+        <select id="er-destino"></select>
+      </div>
+      <div class="field">
+        <label>Fecha esperada</label>
+        <input type="date" id="er-due">
+      </div>
+      <div class="field">
+        <label>N° de OT</label>
+        <input type="text" id="er-ot">
+      </div>
+      <div class="field">
+        <label>Responsable</label>
+        <input type="text" id="er-resp">
+      </div>
+      <div class="field field-full">
+        <label>Actividad</label>
+        <input type="text" id="er-act">
+      </div>
+      <div class="field field-full">
+        <label>Notas</label>
+        <textarea id="er-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="actions right">
+      <button class="btn btn-ghost" id="er-cancel" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="er-save" type="button">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal">
   <div class="modal">
     <h3 id="modal-title">Confirmar</h3>
@@ -3663,6 +3739,8 @@ const DESTINOS = [
   {key:'Ventiladores',   label:'Ventiladores',    type:'warehouse'},
   // Lugares de consumo — agrupados por área
   // ── CHANCADO ──
+  {key:'Prechancado',    label:'Prechancado',     type:'consumption', grupo:'Chancado'},
+  {key:'ChancadoFino',   label:'Chancado fino',   type:'consumption', grupo:'Chancado'},
   {key:'Ch3',            label:'Ch 3°',           type:'consumption', grupo:'Chancado'},
   {key:'Ch4',            label:'Ch 4°',           type:'consumption', grupo:'Chancado'},
   {key:'Nodo3500',       label:'Nodo 3500',       type:'consumption', grupo:'Chancado'},
@@ -5161,6 +5239,8 @@ function renderReservasTable(){
 
   document.getElementById('rsv-tbl-count').textContent =
     `${rows.length.toLocaleString('es-CL')} / ${state.reservations.length.toLocaleString('es-CL')}`;
+  // Lista filtrada para el botón "Exportar filtrado".
+  window._rsvFiltered = rows;
 
   if(!rows.length){
     tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:24px">Sin reservas que mostrar.</td></tr>';
@@ -5179,6 +5259,7 @@ function renderReservasTable(){
                     : '<span class="tag" style="background:var(--line);color:var(--muted)">Cancelada</span>';
     const actions = r.status==='active'
       ? `<div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="tbl-edit" onclick="openEditReserva(${r.id})" title="Editar los datos de esta reserva">✎ Editar</button>
           <button class="tbl-edit" onclick="convertReservaToSalida(${r.id})" title="Convertir esta reserva en una salida (entrega del material)">→ Salida</button>
           <button class="tbl-edit" style="border-color:var(--red-l);color:var(--red)" onclick="cancelReservation(${r.id})" title="Cancelar esta reserva">✕ Cancelar</button>
         </div>`
@@ -5208,10 +5289,140 @@ function renderReservasTable(){
 }
 window.renderReservasTable = renderReservasTable;
 
+// ----- Exportar reservas filtradas a Excel -----
+function exportReservasFiltrado(){
+  if(typeof XLSX === 'undefined'){ toast('Librería Excel no cargada (revisa tu conexión)','err'); return; }
+  renderReservasTable();
+  const rows = window._rsvFiltered || [];
+  if(!rows.length){ toast('No hay reservas que exportar con los filtros actuales.','warn'); return; }
+  const STATUS_LABEL = {active:'Activa', fulfilled:'Cumplida', cancelled:'Cancelada'};
+  const header = ['Creada','Para (fecha esperada)','Material','SAP','Área','Destino','Cantidad','Actividad','OT','Responsable','Operador','Estado','Notas'];
+  const data = rows.map(r=>[
+    fmtDateTime(r.timestamp),
+    r.dueDate ? fmtDate(r.dueDate) : '',
+    r.material || '', r.sap ?? '',
+    AREA_LABEL[r.area]||r.area||'',
+    DEST_LABEL[r.destino]||r.destino||'',
+    r.qty||0,
+    r.activity||'', r.ot||'', r.resp||'', r.user||'',
+    STATUS_LABEL[r.status]||r.status||'',
+    r.notes||''
+  ]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
+  ws['!cols'] = [{wch:16},{wch:16},{wch:42},{wch:12},{wch:12},{wch:16},{wch:9},{wch:28},{wch:16},{wch:18},{wch:14},{wch:11},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Reservas filtradas');
+  XLSX.writeFile(wb, `Reservas_filtradas_SINFRA_${todayStr()}.xlsx`);
+  toast(`Excel descargado con ${data.length.toLocaleString('es-CL')} reservas filtradas.`, 'ok');
+}
+window.exportReservasFiltrado = exportReservasFiltrado;
+
+// ===========================================================
+// EDITAR RESERVA (modal)
+// ===========================================================
+let editingRsvId = null;
+
+function openEditReserva(id){
+  const r = state.reservations.find(x=>x.id===id);
+  if(!r){ toast('Reserva no encontrada','err'); return; }
+  if(r.status !== 'active'){ toast('Solo se pueden editar reservas activas.','warn'); return; }
+  editingRsvId = id;
+
+  document.getElementById('er-mat-line').textContent =
+    `${r.material||''}${r.sap?` · SAP ${r.sap}`:''}`;
+
+  // Poblar selects de área y destino
+  const areaSel = document.getElementById('er-area');
+  areaSel.innerHTML = AREAS.map(a=>`<option value="${a.key}">${escHtml(a.label)}</option>`).join('');
+  areaSel.value = r.area || '';
+
+  const destSel = document.getElementById('er-destino');
+  const grupos = {};
+  DESTINOS.forEach(d=>{ const g = d.grupo || (d.type==='warehouse'?'Almacenamiento':'Otros'); (grupos[g]=grupos[g]||[]).push(d); });
+  destSel.innerHTML = Object.entries(grupos).map(([g, ds])=>
+    `<optgroup label="${escHtml(g)}">${ds.map(d=>`<option value="${d.key}">${escHtml(d.label)}</option>`).join('')}</optgroup>`
+  ).join('');
+  destSel.value = r.destino || '';
+
+  document.getElementById('er-qty').value = r.qty != null ? r.qty : 0;
+  document.getElementById('er-due').value = r.dueDate || '';
+  document.getElementById('er-ot').value = r.ot || '';
+  document.getElementById('er-resp').value = r.resp || '';
+  document.getElementById('er-act').value = r.activity || '';
+  document.getElementById('er-notes').value = r.notes || '';
+
+  document.getElementById('edit-rsv-modal').classList.add('open');
+}
+window.openEditReserva = openEditReserva;
+
+function closeEditReserva(){
+  document.getElementById('edit-rsv-modal').classList.remove('open');
+  editingRsvId = null;
+}
+window.closeEditReserva = closeEditReserva;
+
+function saveEditReserva(){
+  if(editingRsvId == null) return closeEditReserva();
+  const r = state.reservations.find(x=>x.id===editingRsvId);
+  if(!r) return closeEditReserva();
+
+  const qty = parseFloat(document.getElementById('er-qty').value);
+  if(isNaN(qty) || qty <= 0){ toast('La cantidad debe ser mayor que 0.','err'); return; }
+  const area = document.getElementById('er-area').value;
+  const destino = document.getElementById('er-destino').value;
+  if(!area){ toast('Selecciona el área de origen.','err'); return; }
+  if(!destino){ toast('Selecciona el destino.','err'); return; }
+  const ot = normalizeOtInput(document.getElementById('er-ot').value);
+  if(!ot){ toast('Indica la OT o N° de actividad.','err'); return; }
+  if(ot.length < 9){ toast(`El N° de OT debe tener al menos 9 caracteres (tiene ${ot.length}).`,'err',5000); return; }
+
+  const activity = document.getElementById('er-act').value.trim();
+  ensureOtExists(ot, activity);
+
+  r.qty = qty;
+  r.area = area;
+  r.destino = destino;
+  r.dueDate = document.getElementById('er-due').value || '';
+  r.ot = ot;
+  r.resp = document.getElementById('er-resp').value.trim();
+  r.activity = activity;
+  r.notes = document.getElementById('er-notes').value.trim();
+  // Recalcular si la cantidad supera el disponible en el área elegida → compra urgente
+  try{
+    const mat = state.materials.find(x=>x.id===r.matId);
+    if(mat && typeof getAvailableQty === 'function'){
+      r.urgentPurchase = qty > getAvailableQty(mat, area);
+    }
+  }catch(e){}
+  r.updatedAt = new Date().toISOString();
+  r.updatedBy = state.user || '—';
+
+  saveState();
+  if(typeof syncPushEvent === 'function' && typeof buildReservationEvent === 'function'){
+    try{ syncPushEvent(buildReservationEvent('reservation_updated', r)); }catch(e){}
+  }
+  closeEditReserva();
+  renderReservasTable();
+  if(document.getElementById('view-inventario').classList.contains('active')) renderInventario();
+  if(document.getElementById('view-dashboard').classList.contains('active')) renderDashboard();
+  toast('Reserva actualizada.', 'ok');
+}
+window.saveEditReserva = saveEditReserva;
+
+(function wireEditRsvModal(){
+  const c = document.getElementById('er-cancel');
+  const s = document.getElementById('er-save');
+  const bg = document.getElementById('edit-rsv-modal');
+  if(c) c.addEventListener('click', closeEditReserva);
+  if(s) s.addEventListener('click', saveEditReserva);
+  if(bg) bg.addEventListener('click', e=>{ if(e.target===bg) closeEditReserva(); });
+})();
+
 // ==========================================================
 // OT ANALYSIS MODULE
 // ==========================================================
 let otaPeriod = 'week';
+let otaOnlyWithRsv = false;
 
 function setOtaPeriod(p){
   otaPeriod = p;
@@ -5359,7 +5570,15 @@ function renderOtAnalysis(){
       });
   }
 
-  const sorted = Object.entries(groups).sort((a,b)=>b[1].total - a[1].total);
+  let sorted = Object.entries(groups).sort((a,b)=>b[1].total - a[1].total);
+
+  // Botón general "Ver OTs con reservas": deja solo las OT con reservas activas.
+  if(otaOnlyWithRsv && grouping === 'ot'){
+    const otsConRsv = new Set(
+      (state.reservations||[]).filter(r=>r.status==='active' && r.ot).map(r=>r.ot)
+    );
+    sorted = sorted.filter(([key]) => otsConRsv.has(key));
+  }
 
   // Empty check after rsv-only groups were possibly injected
   if(!sorted.length){
@@ -5411,6 +5630,7 @@ function renderOtAnalysis(){
 
     // === Reservas activas asociadas (solo cuando agrupamos por OT) ===
     let reservasBlock = '';
+    let rsvToggleBtn = '';
     if(grouping === 'ot' && key !== '(sin OT)'){
       const rsvActivas = (state.reservations || []).filter(r =>
         r.status === 'active' && r.ot === key
@@ -5434,6 +5654,7 @@ function renderOtAnalysis(){
           </tr>`;
         }).join('');
         reservasBlock = `
+          <div class="ota-rsv-wrap" id="ota-rsv-wrap-${idx}" style="display:${otaOnlyWithRsv?'block':'none'}">
           <div class="ota-rsv-section ${urgentCount>0?'has-urgent':''}">
             <div class="ota-rsv-h">
               <span class="ota-rsv-pill">RESERVAS</span>
@@ -5453,12 +5674,17 @@ function renderOtAnalysis(){
               </tr></thead>
               <tbody>${rsvRows}</tbody>
             </table>
+          </div>
           </div>`;
+        rsvToggleBtn = `<button type="button" class="ota-rsv-toggle ${urgentCount>0?'has-urgent':''} ${otaOnlyWithRsv?'active':''}" onclick="event.stopPropagation();toggleOtaRsv(${idx},this)" title="Ver/ocultar las reservas activas de esta OT">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${otaOnlyWithRsv?'Ocultar':'Ver'} reservas (${rsvActivas.length})${urgentCount>0?' ⚠':''}
+          </button>`;
       }
     }
 
-    // Initial: first 3 groups open by default
-    const isOpen = idx < 3;
+    // Initial: first 3 groups open by default (todas abiertas en modo "solo reservas")
+    const isOpen = idx < 3 || otaOnlyWithRsv;
 
     // Pick icon letter
     const iconLetter = grouping === 'ot' ? 'OT' : grouping === 'destino' ? 'D' : 'M';
@@ -5482,6 +5708,7 @@ function renderOtAnalysis(){
             Editar OT
           </button>` : ''}</div>
           <div class="meta">${escHtml(metaParts.join(' · '))}${g.sub?` · ${g.sub}`:''}</div>
+          ${rsvToggleBtn ? `<div class="ota-rsv-toggle-wrap">${rsvToggleBtn}</div>` : ''}
         </div>
         <div class="ota-group-num">${g.total.toLocaleString('es-CL')}<small>unidades</small></div>
         <svg class="ota-group-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -5497,6 +5724,25 @@ function renderOtAnalysis(){
   }).join('');
 }
 window.renderOtAnalysis = renderOtAnalysis;
+
+// Mostrar/ocultar el bloque de reservas de una OT en Análisis OT
+function toggleOtaRsv(idx, btn){
+  const wrap = document.getElementById('ota-rsv-wrap-'+idx);
+  if(!wrap) return;
+  const group = btn.closest('.ota-group');
+  const showing = wrap.style.display !== 'none';
+  if(showing){
+    wrap.style.display = 'none';
+    btn.classList.remove('active');
+    btn.innerHTML = btn.innerHTML.replace('Ocultar reservas','Ver reservas');
+  } else {
+    if(group && !group.classList.contains('open')) group.classList.add('open');
+    wrap.style.display = '';
+    btn.classList.add('active');
+    btn.innerHTML = btn.innerHTML.replace('Ver reservas','Ocultar reservas');
+  }
+}
+window.toggleOtaRsv = toggleOtaRsv;
 
 // ---------- Movement detail modal (double-click on OT row) ----------
 // Opens a modal that shows: full data of the clicked movement, plus all
@@ -5671,6 +5917,33 @@ document.addEventListener('keydown', e=>{
   const el = document.getElementById(id);
   if(el) el.addEventListener('input', renderOtAnalysis);
 });
+
+// Botón general: mostrar solo las OT con reservas activas (con reservas desplegadas)
+function toggleOtaOnlyRsv(btn){
+  otaOnlyWithRsv = !otaOnlyWithRsv;
+  const gsel = document.getElementById('ota-group');
+  if(otaOnlyWithRsv && gsel && gsel.value !== 'ot') gsel.value = 'ot';  // este modo es por OT
+  if(btn){
+    btn.classList.toggle('active', otaOnlyWithRsv);
+    const SHOW='Ver OTs con reservas', HIDE='Ocultar · ver todo';
+    btn.innerHTML = btn.innerHTML.replace(SHOW,'\u0000').replace(HIDE,'\u0000')
+      .replace('\u0000', otaOnlyWithRsv?HIDE:SHOW);
+  }
+  renderOtAnalysis();
+}
+window.toggleOtaOnlyRsv = toggleOtaOnlyRsv;
+
+// Si el usuario cambia el agrupamiento a algo distinto de OT, salimos del modo "solo reservas"
+const _otaGroupSel = document.getElementById('ota-group');
+if(_otaGroupSel){
+  _otaGroupSel.addEventListener('change', ()=>{
+    if(otaOnlyWithRsv && _otaGroupSel.value !== 'ot'){
+      otaOnlyWithRsv = false;
+      const b = document.getElementById('ota-only-rsv-btn');
+      if(b){ b.classList.remove('active'); b.innerHTML = b.innerHTML.replace('Ocultar · ver todo','Ver OTs con reservas'); }
+    }
+  });
+}
 
 // Excel export
 function exportOtAnalysisExcel(){
@@ -7240,6 +7513,20 @@ function renderDashboard(){
   const crit = state.materials.filter(m=>m.critico && m.critico.toLowerCase()!=='ok');
   document.getElementById('kpi-crit').textContent = crit.length;
 
+  // OT KPIs (basados en las salidas del período, mismo criterio que Análisis OT)
+  const salidasOt = periodMovs.filter(m=>m.type==='salida' && m.ot && !m._adjustment);
+  const otByQty = {};
+  salidasOt.forEach(m=>{ otByQty[m.ot] = (otByQty[m.ot]||0) + (m.qty||0); });
+  const otCountEl = document.getElementById('kpi-ot-count');
+  if(otCountEl) otCountEl.textContent = Object.keys(otByQty).length.toLocaleString('es-CL');
+  const otCountSub = document.getElementById('kpi-ot-count-sub');
+  if(otCountSub) otCountSub.textContent = `${periodLbl} · ${salidasOt.reduce((s,m)=>s+(m.qty||0),0).toLocaleString('es-CL')} unid.`;
+  const topOt = Object.entries(otByQty).sort((a,b)=>b[1]-a[1])[0];
+  const otTopEl = document.getElementById('kpi-ot-top');
+  const otTopSub = document.getElementById('kpi-ot-top-sub');
+  if(otTopEl) otTopEl.textContent = topOt ? topOt[0] : '—';
+  if(otTopSub) otTopSub.textContent = topOt ? `${topOt[1].toLocaleString('es-CL')} unid. despachadas` : 'sin salidas con OT';
+
   // Areas tiles
   const ag = document.getElementById('area-grid');
   ag.innerHTML = AREAS.map(a=>{
@@ -7460,6 +7747,10 @@ function renderInventario(){
     countEl.textContent = `${mats.length.toLocaleString('es-CL')} / ${state.materials.length.toLocaleString('es-CL')}`;
   }
   const tb = document.querySelector('#inv-tbl tbody');
+  // Guardamos la lista filtrada COMPLETA (sin el tope de 500) para que el
+  // botón "Exportar filtrado" descargue exactamente lo que está filtrado.
+  window._invFiltered = mats;
+  window._invFilterContext = { search, clasif, stateFil, areaFil, rsvFil, sapFil };
   if(!mats.length){ tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:24px">Sin resultados.</td></tr>'; return; }
   // limit display to first 500 for performance
   const cap = 500;
@@ -7507,6 +7798,55 @@ function renderInventario(){
   }
 }
 ['inv-search','inv-clasif','inv-state','inv-area','inv-rsv','inv-sap'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input', renderInventario);});
+
+// ----- Exportar inventario filtrado a Excel -----
+// Descarga exactamente las filas visibles (respeta todos los filtros).
+function exportInventarioFiltrado(){
+  if(typeof XLSX === 'undefined'){ toast('Librería Excel no cargada (revisa tu conexión)','err'); return; }
+  // Aseguramos que la lista filtrada esté al día con los filtros actuales.
+  renderInventario();
+  const mats = window._invFiltered || [];
+  if(!mats.length){ toast('No hay filas que exportar con los filtros actuales.','warn'); return; }
+
+  const header = [
+    'Clasificación','Material','SAP','Marca','Modelo','Medidas',
+    'KM 15','Reactivos','PMFC','Nivel 17','Ventiladores',
+    'Total','Reservado','Disponible','Estado SAP','Estado','Estado eliminación'
+  ];
+  const rows = mats.map(m=>{
+    const total = AREA_KEYS.reduce((s,k)=>s+(m.stock[k]||0),0);
+    const reservedTot = getReservedTotalForMat(m.id);
+    const availTot = total - reservedTot;
+    const sp = m.specs || {};
+    let sapEstado = '';
+    try{
+      const s = (typeof getSapEstadoForMat === 'function') ? getSapEstadoForMat(m) : null;
+      sapEstado = s ? (s.estado || '') : '';
+    }catch(e){}
+    const estado = (m.critico && m.critico.toLowerCase()!=='ok')
+      ? m.critico
+      : (total>0 ? 'OK' : 'Sin stock');
+    return [
+      m.clasif || '', m.material || '', m.sap ?? '',
+      sp.marca || '', sp.modelo || '', sp.medidas || '',
+      m.stock.KM15||0, m.stock.Reactivos||0, m.stock.PMFC||0, m.stock.Nivel17||0, m.stock.Ventiladores||0,
+      total, reservedTot, availTot, sapEstado, estado,
+      m.deletedAt ? `Eliminado ${fmtDate(m.deletedAt.slice(0,10))}` : ''
+    ];
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = [
+    {wch:16},{wch:42},{wch:12},{wch:14},{wch:14},{wch:16},
+    {wch:8},{wch:10},{wch:8},{wch:9},{wch:11},
+    {wch:9},{wch:11},{wch:11},{wch:12},{wch:12},{wch:20}
+  ];
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventario filtrado');
+  XLSX.writeFile(wb, `Inventario_filtrado_SINFRA_${todayStr()}.xlsx`);
+  toast(`Excel descargado con ${rows.length.toLocaleString('es-CL')} materiales filtrados.`, 'ok');
+}
+window.exportInventarioFiltrado = exportInventarioFiltrado;
 
 // ============================================================
 // SAP RESERVAS (compras) — carga desde Excel SharePoint
@@ -8367,9 +8707,8 @@ function renderReportesCharts(){
   if(typeof Chart === 'undefined') return;  // Chart.js todavía no cargó
 
   // ---- 1. Entradas vs Salidas por área (últimos 30 días) ----
-  const ahora = new Date();
-  const desde = new Date(ahora); desde.setDate(desde.getDate() - 30);
-  const desdeIso = desde.toISOString().slice(0,10);
+  // Anclado a la fecha real (zona Chile) vía getPeriodRange, no a UTC.
+  const desdeIso = getPeriodRange('month').from;
 
   const movsRec = state.movements.filter(m => !m._adjustment && m.date >= desdeIso);
   const datosAreas = AREAS.map(a => {
@@ -10727,7 +11066,7 @@ function exportOtsExcel(){
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, 'OTs');
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   XLSX.writeFile(wb, `Catalogo_OTs_SINFRA_${today}.xlsx`);
   toast(`Excel descargado con ${rows.length} OTs.`, 'ok');
 }
